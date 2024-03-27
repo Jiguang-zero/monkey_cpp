@@ -124,7 +124,7 @@ void testNextToken() {
 
     bool flag(true);
 
-    cout << "Test testNextToken() start: " << endl;
+    cout << "Test testNextToken() Start: " << endl;
     if (types.size() != literals.size()) {
         cout << "The size of literals is not the same as types.\n";
         flag = false;

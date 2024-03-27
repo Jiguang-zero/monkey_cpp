@@ -7,6 +7,7 @@
 #include "lexer/lexer_test.cpp"
 
 int main() {
+    // token ≤‚ ‘
     testNextToken();
 
     return 0;

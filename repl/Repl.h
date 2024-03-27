@@ -27,7 +27,7 @@ namespace monkey {
              * @param in istream&
              * @param out ostream&
              */
-            static void start(istream& in, ostream& out);
+            static void Start(istream& in, ostream& out);
 
         };
 

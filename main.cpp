@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     string a;
     printf("Hello %s! Feel free to type in commands\n", username);
 
-    monkey::repl::Repl::start(std::cin, std::cout);
+    monkey::repl::Repl::Start(std::cin, std::cout);
 
     return 0;
 }

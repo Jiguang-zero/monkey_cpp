@@ -8,5 +8,6 @@ add_executable(monkey main.cpp
         token/Token.cpp
         lexer/Lexer.cpp
         repl/Repl.cpp
+        ast/ast.cpp
 )
 

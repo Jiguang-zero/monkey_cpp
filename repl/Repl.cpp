@@ -11,7 +11,7 @@ using monkey::token::Token;
 
 namespace monkey {
     namespace repl {
-        void Repl::start(istream &in, ostream &out) {
+        void Repl::Start(istream &in, ostream &out) {
             while (true) {
                 out << PROMPT;
 
