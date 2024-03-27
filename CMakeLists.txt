@@ -9,5 +9,8 @@ add_executable(monkey main.cpp
         lexer/Lexer.cpp
         repl/Repl.cpp
         ast/ast.cpp
+        ast/Program.cpp
+        ast/Statement.cpp
+        parser/Parser.cpp
 )
 
