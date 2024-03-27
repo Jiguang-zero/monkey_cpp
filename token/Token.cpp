@@ -30,6 +30,10 @@ namespace monkey {
             return Literal;
         }
 
+        string Token::String() {
+            return "Type: " + getType() + " Literal: " + getLiteral();
+        }
+
 
     } // token
 

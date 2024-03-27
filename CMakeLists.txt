@@ -7,5 +7,6 @@ set(CMAKE_EXE_LINKER_FLAGS "-static")
 add_executable(monkey main.cpp
         token/Token.cpp
         lexer/Lexer.cpp
+        repl/Repl.cpp
 )
 

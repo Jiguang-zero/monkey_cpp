@@ -58,6 +58,12 @@ namespace monkey {
             // 获取字面量的值
             string getLiteral();
 
+            /**
+             * 将 token 转化为 string
+             * @return string
+             */
+            string String();
+
         };
 
         extern TokenType ILLEGAL; // 非法单元
