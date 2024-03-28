@@ -26,6 +26,12 @@ namespace monkey {
 
             void statementNode() override {};
 
+            /**
+             * 获取 Let 语句的Name (不可从外部修改)
+             * @return
+             */
+            __attribute__((unused)) Identifier* getName();
+
             // let 语句 TokenLiteral 的实现
             string TokenLiteral() override;
 

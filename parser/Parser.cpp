@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include <iostream>
 
 namespace monkey {
     namespace parser {
@@ -24,23 +25,29 @@ namespace monkey {
         void Parser::ParseProgram(ast::Program** program) {
             *program = new ast::Program();
 
-            (*program)->setStatements(vector<ast::Statement>());
+            (*program)->setStatements(vector<ast::Statement*>());
 
             while (curToken.getType() != token::TOKEN_EOF) {
-                ast::Statement *stmt = nullptr;
+                auto *stmt = new ast::Statement();
                 parseStatement(&stmt);
+                std::cout << "33: " << stmt->TokenLiteral() << std::endl;
+
                 if (stmt != nullptr) {
-                    (*program)->getStatements().emplace_back(*stmt);
+                    (*program)->getStatements().emplace_back(stmt);
+
                 }
                 nextToken();
             }
         }
 
+
         void Parser::parseStatement(ast::Statement** statement) {
             token::TokenType type = curToken.getType();
 
             if (type == token::LET) {
+                // 转化所有类型的指针
                 parseLetStatement(reinterpret_cast<ast::LetStatement **>(statement));
+                std::cout << "47: " << (*statement)->TokenLiteral() << std::endl;
             }
         }
 
@@ -79,6 +86,20 @@ namespace monkey {
                 return true;
             }
             return false;
+        }
+
+        ast::Statement Parser::parseStatement() {
+            ast::Statement statement;
+
+            token::TokenType type = curToken.getType();
+
+            if (type == token::LET) {
+                // 转化所有类型的指针
+                parseLetStatement(reinterpret_cast<ast::LetStatement **>(&statement));
+                std::cout << "95: " << statement.TokenLiteral() << std::endl;
+            }
+
+            return statement;
         }
     }
 }

@@ -20,5 +20,7 @@ namespace monkey {
         __attribute__((unused)) string LetStatement::String() {
             return "Token: " + TokenLiteral() + " " + "Identifier: " + Name->String() + " Value: ";
         }
+
+        __attribute__((unused)) Identifier *LetStatement::getName() {return Name;}
     }
 }

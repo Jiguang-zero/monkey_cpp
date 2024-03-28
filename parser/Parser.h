@@ -64,11 +64,20 @@ namespace monkey {
              */
             void ParseProgram(ast::Program** program);
 
+
             /**
              * 解析 statement
              * @param stmt  指向statement 节点的指针
              */
             void parseStatement(ast::Statement** stmt);
+
+            /**
+             * 解析语句
+             * > 在最开始的时候采用 void parseStatement(ast::Statement** stmt);
+             * > 但是指针作为局部变量可能会导致被注销
+             * @return 返回语句节点 Statement
+             */
+            ast::Statement parseStatement();
         };
 
     }

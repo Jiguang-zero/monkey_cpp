@@ -14,18 +14,18 @@ namespace monkey
     namespace ast
     {
         class Program : virtual public Node{
-            private:
-                vector<Statement> Statements;
+            protected:
+                vector<Statement*> Statements;
 
             public:
                 // 默认构造函数
                 Program() = default;
 
                 // 从外部设置 Statements
-                void setStatements(vector<Statement> statements);
+                void setStatements(vector<Statement*> statements);
 
                 // 返回 Statements 以供外部修改
-                vector<Statement>& getStatements();
+                vector<Statement*>& getStatements();
 
                 /**
                  * Program 的 TokenLiteral() 定义

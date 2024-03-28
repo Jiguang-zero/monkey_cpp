@@ -2,10 +2,16 @@
 // Created by 86158 on 2024/3/26.
 //
 
-
-#include "parser/parser_test.h"
+#include "test.h"
 
 using namespace monkey;
+
+void test() {
+    testToken();
+
+    testParser();
+};
+
 
 int main(int argc, char** argv) {
 //    // window 环境获取用户
@@ -18,7 +24,7 @@ int main(int argc, char** argv) {
 //
 //    monkey::repl::Repl::Start(std::cin, std::cout);
 
-    testLetStatements();
+    test();
 
     return 0;
 }

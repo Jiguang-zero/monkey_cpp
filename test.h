@@ -4,7 +4,7 @@
 
 // 这是一个测试应用, 不属于cmake项目
 
-#include "lexer/lexer_test.cpp"
+#include "lexer/lexer_test.h"
 #include "parser/parser_test.h"
 
 // token 测试
@@ -26,11 +26,4 @@ void testParser() {
     cout << "Test parser END" << endl;
 
     cout << endl;
-}
-
-int main() {
-    // token 测试
-    testParser();
-
-    return 0;
 }
