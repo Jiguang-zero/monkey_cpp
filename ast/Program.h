@@ -3,6 +3,7 @@
 #define MONKEY_PROGRAM_H
 
 #include "ast.h"
+#include "Statement.h"
 
 #include <vector>
 
@@ -24,12 +25,12 @@ namespace monkey
                 void setStatements(vector<Statement> statements);
 
                 // 返回 Statements 以供外部修改
-                vector<Statement> getStatements();
+                vector<Statement>& getStatements();
 
                 /**
                  * Program 的 TokenLiteral() 定义
                  */
-                string TokenLiteral();
+                string TokenLiteral() override;
 
         };
         

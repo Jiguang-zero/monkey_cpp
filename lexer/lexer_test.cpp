@@ -3,7 +3,6 @@
 //
 
 #include "Lexer.cpp"
-#include "../token/Token.cpp"
 #include <iostream>
 
 #include <vector>
@@ -109,8 +108,8 @@ void testNextToken() {
             token::IDENT,
             token::RPAREN,
             token::SEMICOLON,
-            token::TRUE,
-            token::FALSE,
+            token::TOKEN_TRUE,
+            token::TOKEN_FALSE,
             token::RETURN,
             token::IF,
             token::ELSE,

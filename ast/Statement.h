@@ -18,10 +18,25 @@ namespace monkey {
             Expression Value;
 
         public:
-            void statementNode() {};
+            /**
+             * 外部设置 LetStatement 的 变量名
+             * @param identifier Identifier *
+             */
+            void setName(Identifier* identifier);
+
+            void statementNode() override {};
 
             // let 语句 TokenLiteral 的实现
-            string TokenLiteral();
+            string TokenLiteral() override;
+
+            /**
+             * 构造函数，传入词法单元
+             * @param token
+             */
+            explicit LetStatement(token::Token token);
+
+            // 返回 Let 语句的 String() 函数
+            __attribute__((unused)) string String();
         };
     }
 }

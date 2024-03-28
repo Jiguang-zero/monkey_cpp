@@ -68,20 +68,20 @@ namespace monkey {
 
         TokenType FUNCTION = "FUNCTION";
         TokenType LET = "LET";
-        TokenType TRUE = "TRUE";
-        TokenType FALSE = "FALSE";
+        TokenType TOKEN_TRUE = "TOKEN_TRUE";
+        TokenType TOKEN_FALSE = "TOKEN_FALSE";
         TokenType RETURN = "RETURN";
         TokenType IF = "IF";
         TokenType ELSE = "ELSE";
 
 
         map<string, TokenType > keywords = {
-                {"fn", FUNCTION},
-                {"let", LET},
-                {"true", TRUE},
-                {"false", FALSE},
-                {"if", IF},
-                {"else", ELSE},
+                {"fn",     FUNCTION},
+                {"let",    LET},
+                {"true",   TOKEN_TRUE},
+                {"false",  TOKEN_FALSE},
+                {"if",     IF},
+                {"else",   ELSE},
                 {"return", RETURN}
         };
 

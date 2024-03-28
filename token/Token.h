@@ -104,8 +104,8 @@ namespace monkey {
         // ¹Ø¼ü×Ö
         extern TokenType FUNCTION; // º¯Êý¹Ø¼ü×Ö fn
         extern TokenType LET; // ¹Ø¼ü×Ö let
-        extern TokenType TRUE; // ¹Ø¼ü×Ö true
-        extern TokenType FALSE; // ¹Ø¼ü×Ö false
+        extern TokenType TOKEN_TRUE; // ¹Ø¼ü×Ö true
+        extern TokenType TOKEN_FALSE; // ¹Ø¼ü×Ö false
         extern TokenType IF; // ¹Ø¼ü×Ö if
         extern TokenType ELSE; // ¹Ø¼ü×Ö else
         extern TokenType RETURN; // ¹Ø¼ü×Ö return

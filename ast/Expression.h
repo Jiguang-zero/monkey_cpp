@@ -24,7 +24,20 @@ namespace monkey {
                 /**
                  * Identifier TokenLiteral 的实现
                  */
-                string TokenLiteral();
+                string TokenLiteral() override;
+
+                /**
+                 * 构造函数
+                 * @param t token::Token 表示该标识符的词法单元 IDENT
+                 * @param p string 表示该标识符的字面量 比如 let a = 2 , a 就是 value
+                 */
+                Identifier(token::Token t, string v);
+
+                /**
+                 * 返回 Identifier 表达式的 String
+                 * @return
+                 */
+                string String();
         };
 
     } // ast

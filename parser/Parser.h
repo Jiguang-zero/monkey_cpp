@@ -18,10 +18,37 @@ namespace monkey {
 
         private:
             // 构造函数， private， 仅能通过New创建语法解析器
-            Parser(lexer::Lexer* _l);
+            explicit Parser(lexer::Lexer* _l);
 
             // 获取下一个词法单元 Token
             void nextToken();
+
+            /**
+             * 解析 let 语句
+             * @param stmt 指向 let语句节点的指针 的指针
+             */
+             void parseLetStatement(ast::LetStatement** stmt);
+
+            /**
+             * 判断当前token的类型是否与想要的一样
+             * @param t
+             * @return
+             */
+            bool curTokenIs(const token::TokenType& t);
+
+            /**
+             * 判断下一个token的类型是否与想要的一样
+             * @param t
+             * @return
+             */
+            bool peekTokenIs(const token::TokenType& t);
+
+            /**
+             * 判断下一个token的类型是否与想要的一样，如果一样，移动词法单元
+             * @param t
+             * @return
+             */
+            bool expectPeek(const token::TokenType& t);
 
         public:
             /**
@@ -29,19 +56,19 @@ namespace monkey {
              * @param l Lexer*, 传入一个词法解析器的指针
              * @return 返回指向语法解析器的指针
              */
-            Parser* New(lexer::Lexer* l);
+            static Parser* New(lexer::Lexer* l);
 
             /**
              * 解析 program
-             * @return 返回 指向 program 节点 (ast的根节点) 的指针
+             * @param program  指向 program 节点 (ast的根节点) 的指针 的指针
              */
-            ast::Program* ParseProgram();
+            void ParseProgram(ast::Program** program);
 
             /**
              * 解析 statement
-             * @return 返回 statement 节点
+             * @param stmt  指向statement 节点的指针
              */
-            ast::Statement parseStatement();
+            void parseStatement(ast::Statement** stmt);
         };
 
     }

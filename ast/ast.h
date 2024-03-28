@@ -19,10 +19,10 @@ namespace monkey {
             public:
                 Node() = default;
 
-                /**
+            virtual /**
                  * 获取Node节点的词法单元字面量 
                  */
-                string TokenLiteral() {};
+                string TokenLiteral() {return "";};
         };
 
 
@@ -33,7 +33,7 @@ namespace monkey {
             public:
                 Statement() = default;
 
-                /**
+            virtual /**
                  * 接口，没有实际功能
                  */
                 void statementNode() {};
