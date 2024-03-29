@@ -15,7 +15,7 @@ namespace monkey {
         }
 
         string Identifier::String() {
-            return Token.getLiteral() + " " + Value;
+            return Value;
         }
     }
 

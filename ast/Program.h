@@ -21,6 +21,12 @@ namespace monkey
                 // 默认构造函数
                 Program() = default;
 
+                /**
+                 * 构造函数，传递 statements
+                 * @param statements 要传入临时新建的量，所以不传入引用
+                 */
+                __attribute__((unused)) explicit Program(vector<Statement*> statements);
+
                 // 从外部设置 Statements
                 void setStatements(vector<Statement*> statements);
 
@@ -31,6 +37,12 @@ namespace monkey
                  * Program 的 TokenLiteral() 定义
                  */
                 string TokenLiteral() override;
+
+                /**
+                 * 获取 Program 的String
+                 * @return
+                 */
+                string String() override;
 
         };
         

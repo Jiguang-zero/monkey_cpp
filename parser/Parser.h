@@ -16,6 +16,8 @@ namespace monkey {
             token::Token curToken; // 当前词法单元
             token::Token peekToken; // 下一个词法单元
 
+            vector<string> errors; // 错误处理
+
         private:
             // 构造函数， private， 仅能通过New创建语法解析器
             explicit Parser(lexer::Lexer* _l);
@@ -28,6 +30,12 @@ namespace monkey {
              * @param stmt 指向 let语句节点的指针 的指针
              */
              void parseLetStatement(ast::LetStatement** stmt);
+
+             /**
+              * 解析 return 语句
+              * @param stmt 指向 return 语句节点指针 的指针
+              */
+             void parseReturnStatement(ast::ReturnStatement** stmt);
 
             /**
              * 判断当前token的类型是否与想要的一样
@@ -49,6 +57,12 @@ namespace monkey {
              * @return
              */
             bool expectPeek(const token::TokenType& t);
+
+            /**
+             * 当下一个 token 类型错误时，添加错误信息
+             * @param t const token::TokenType&，使用常引用避免额外内存开销
+             */
+            void peekError(const token::TokenType& t);
 
         public:
             /**
@@ -72,12 +86,11 @@ namespace monkey {
             void parseStatement(ast::Statement** stmt);
 
             /**
-             * 解析语句
-             * > 在最开始的时候采用 void parseStatement(ast::Statement** stmt);
-             * > 但是指针作为局部变量可能会导致被注销
-             * @return 返回语句节点 Statement
+             * 获取 parser 的错误信息
+             * 不可从外部修改
+             * @return vector<string>a
              */
-            ast::Statement parseStatement();
+            __attribute__((unused)) vector<string> getErrors();
         };
 
     }

@@ -6,6 +6,7 @@
 #define MONKEY_AST_H
 
 #include <string>
+#include "sstream"
 
 using std::string;
 
@@ -23,6 +24,11 @@ namespace monkey {
                  * 获取Node节点的词法单元字面量 
                  */
                 string TokenLiteral() {return "";};
+
+            virtual /**
+                 * 获取Node节点的String
+                 */
+                string String() {return "";};
         };
 
 
@@ -46,10 +52,10 @@ namespace monkey {
             public:
                 Expression() = default;
 
-                /**
+            virtual /**
                  * 接口，没有实际功能
                  */
-                void ExpressionNode() {};
+                void expressionNode() {};
         };
 
     } // ast

@@ -19,7 +19,7 @@ namespace monkey {
                 string Value;
 
             public:
-                void expressionNode() {} // 无作用，可以作为避免报错的手段
+                void expressionNode() override {} // 无作用，可以作为避免报错的手段
 
                 /**
                  * Identifier TokenLiteral 的实现
@@ -37,7 +37,7 @@ namespace monkey {
                  * 返回 Identifier 表达式的 String
                  * @return
                  */
-                string String();
+                string String() override;
         };
 
     } // ast

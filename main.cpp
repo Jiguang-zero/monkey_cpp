@@ -10,6 +10,8 @@ void test() {
     testToken();
 
     testParser();
+
+    testAst();
 };
 
 

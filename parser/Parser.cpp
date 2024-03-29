@@ -30,7 +30,6 @@ namespace monkey {
             while (curToken.getType() != token::TOKEN_EOF) {
                 auto *stmt = new ast::Statement();
                 parseStatement(&stmt);
-                std::cout << "33: " << stmt->TokenLiteral() << std::endl;
 
                 if (stmt != nullptr) {
                     (*program)->getStatements().emplace_back(stmt);
@@ -47,7 +46,14 @@ namespace monkey {
             if (type == token::LET) {
                 // 转化所有类型的指针
                 parseLetStatement(reinterpret_cast<ast::LetStatement **>(statement));
-                std::cout << "47: " << (*statement)->TokenLiteral() << std::endl;
+            }
+            else if (type == token::RETURN) {
+                parseReturnStatement(reinterpret_cast<ast::ReturnStatement **>(statement));
+            }
+
+            else {
+                // 赋 为空指针
+                *statement = nullptr;
             }
         }
 
@@ -72,6 +78,16 @@ namespace monkey {
             }
         }
 
+        void Parser::parseReturnStatement(ast::ReturnStatement **stmt) {
+            *stmt = new ast::ReturnStatement(curToken);
+
+            nextToken();
+
+            while (!curTokenIs(token::SEMICOLON)) {
+                nextToken();
+            }
+        }
+
         bool Parser::curTokenIs(const token::TokenType &t) {
             return curToken.getType() == t;
         }
@@ -85,21 +101,24 @@ namespace monkey {
                 nextToken();
                 return true;
             }
-            return false;
-        }
-
-        ast::Statement Parser::parseStatement() {
-            ast::Statement statement;
-
-            token::TokenType type = curToken.getType();
-
-            if (type == token::LET) {
-                // 转化所有类型的指针
-                parseLetStatement(reinterpret_cast<ast::LetStatement **>(&statement));
-                std::cout << "95: " << statement.TokenLiteral() << std::endl;
+            else {
+                peekError(t);
+                //TODO 错误输出测试
+                return false;
             }
-
-            return statement;
         }
+
+        __attribute__((unused)) vector<string> Parser::getErrors() {
+            return errors;
+        }
+
+        void Parser::peekError(const token::TokenType &t) {
+            string msg = "expected next token to be " + t + ", got "
+                    + peekToken.getType() + " instead";
+            errors.emplace_back(msg);
+        }
+
+
+
     }
 }

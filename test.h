@@ -6,6 +6,7 @@
 
 #include "lexer/lexer_test.h"
 #include "parser/parser_test.h"
+#include "ast/ast_test.h"
 
 // token ≤‚ ‘
 void testToken() {
@@ -23,7 +24,19 @@ void testParser() {
 
     testLetStatements();
 
+    testReturnStatements();
+
     cout << "Test parser END" << endl;
+
+    cout << endl;
+}
+
+void testAst() {
+    cout << "Test ast START: " << endl;
+
+    testString();
+
+    cout << "Test ast END" << endl;
 
     cout << endl;
 }

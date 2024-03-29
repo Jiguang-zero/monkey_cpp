@@ -20,6 +20,18 @@ namespace monkey {
         vector<Statement*>& Program::getStatements() {
             return Statements;
         }
+
+        string Program::String() {
+            std::ostringstream oss;
+            for (const auto& s : Statements) {
+                oss << s->String();
+            }
+            return oss.str();
+        }
+
+        Program::Program(vector<Statement *> statements) {
+            Statements = statements;
+        }
     }
 
 }

@@ -18,7 +18,6 @@ using namespace monkey;
 // 如果不加引用，那么传入的是 Statement的拷贝，会造成数据丢失
 // important
 bool testLetStatement(ast::Statement& s, const string& name) {
-    cout << "19: " << s.TokenLiteral() << endl;
     if (s.TokenLiteral() != "let") {
         cout << "TokenLiteral not 'let', but " << s.TokenLiteral() << endl;
         return false;
@@ -40,9 +39,27 @@ bool testLetStatement(ast::Statement& s, const string& name) {
     return true;
 }
 
+void checkoutParserErrors(parser::Parser* & p) {
+    auto errors = p->getErrors();
+    if (errors.empty()) {
+        // cout << "no errors " << endl;
+        return;
+    }
+
+    cout << "parser: " << errors.size() << " errors." << endl;
+
+    for (auto & msg : errors) {
+        cout << "parser error: " << msg << endl;
+    }
+
+    // 如果exit 程序不好调试
+    // exit(-1);
+}
+
+// 测试 let 语句
 void testLetStatements() {
     string input =
-            "let x = 5;\n"
+            "let x = 5 ;\n"
             "let foo_bar = 832343;\n";
     cout << "Test testLetStatements() Start: " << endl;
 
@@ -51,6 +68,7 @@ void testLetStatements() {
 
     auto *program = new ast::Program();
     p->ParseProgram(&program);
+    checkoutParserErrors(p);
 
 
     bool flag = true;
@@ -62,7 +80,7 @@ void testLetStatements() {
     }
 
     if (program->getStatements().size() != 2) {
-        cerr << "program.Statements does not contain 2 statements. got=" << program->getStatements().size() << endl;
+        cout << "program.Statements does not contain 2 statements. got=" << program->getStatements().size() << endl;
         flag = false;
     }
 
@@ -74,7 +92,7 @@ void testLetStatements() {
     int i = 0;
     for (const auto& identifier : identifiers) {
         auto* stmt = program->getStatements()[i];
-        if (!testLetStatement(*stmt, identifiers[i])) {
+        if (!testLetStatement(*stmt, identifier)) {
             flag = false;
         }
 
@@ -83,7 +101,48 @@ void testLetStatements() {
 
 
 
-    cout << "Test testNextToken() end: " << (flag ? "PASS" : "FAIL") << endl;
+    cout << "Test testLetStatements() end: " << (flag ? "PASS" : "FAIL") << endl;
 
 }
 
+// 测试 return 语句
+void testReturnStatements() {
+    string input = "return 5; \n"
+                   "return = a; \n"
+                   "return 324 232;";
+
+    cout << "Test testReturnStatements() Start: " << endl;
+
+    auto l = lexer::Lexer::New(input);
+    auto p = parser::Parser::New(l);
+
+    auto *program = new ast::Program();
+    p->ParseProgram(&program);
+    checkoutParserErrors(p);
+
+    bool flag = true;
+
+    if (program == nullptr) {
+        flag = false;
+
+        cerr << "ParseProgram() returned nullptr" << endl;
+    }
+
+    if (program->getStatements().size() != 3) {
+        cout << "program.Statements does not contain 3 statements. got=" << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    for (const auto& stmt : program->getStatements()) {
+        auto* returnStmt = dynamic_cast<ast::ReturnStatement*>(stmt);
+        if (!returnStmt) {
+            cout << "s not *ast::ReturnStatement, but " << typeid(*stmt).name() << endl;
+            flag = false;
+        }
+        if (returnStmt->TokenLiteral() != "return") {
+            cout << "returnStmt.TokenLiteral not 'return' but " << returnStmt->TokenLiteral() << endl;
+        }
+    }
+
+    cout << "Test testReturnStatements() end: " << (flag ? "PASS" : "FAIL") << endl;
+}
