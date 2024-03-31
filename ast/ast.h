@@ -39,7 +39,7 @@ namespace monkey {
             public:
                 Statement() = default;
 
-            virtual /**
+            __attribute__((unused)) virtual /**
                  * 接口，没有实际功能
                  */
                 void statementNode() {};
@@ -52,7 +52,7 @@ namespace monkey {
             public:
                 Expression() = default;
 
-            virtual /**
+            __attribute__((unused)) virtual /**
                  * 接口，没有实际功能
                  */
                 void expressionNode() {};

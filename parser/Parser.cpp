@@ -10,6 +10,8 @@ namespace monkey {
         Parser* Parser::New(lexer::Lexer* l) {
             auto* p = new Parser(l);
 
+
+
             // 设置 curToken
             p->nextToken();
             p->nextToken();
@@ -52,8 +54,7 @@ namespace monkey {
             }
 
             else {
-                // 赋 为空指针
-                *statement = nullptr;
+                parseExpressionStatement(reinterpret_cast<ast::ExpressionStatement **>(statement));
             }
         }
 
@@ -88,6 +89,21 @@ namespace monkey {
             }
         }
 
+        void Parser::parseExpressionStatement(ast::ExpressionStatement **stmt) {
+            *stmt = new ast::ExpressionStatement(curToken);
+
+            auto expression = new ast::Expression();
+            parseExpression(PRECEDENCE::LOWEST, expression);
+
+            (*stmt)->setExpression(expression);
+
+
+            if (peekTokenIs(token::SEMICOLON)) {
+                nextToken();
+            }
+
+        }
+
         bool Parser::curTokenIs(const token::TokenType &t) {
             return curToken.getType() == t;
         }
@@ -118,6 +134,22 @@ namespace monkey {
             errors.emplace_back(msg);
         }
 
+        void Parser::parseExpression(const PRECEDENCE &precedence, ast::Expression *&leftExpression) {
+            auto prefix = prefixParseFns[curToken.getType()];
+
+            if (prefix == nullptr) {
+                leftExpression = nullptr;
+            }
+
+            prefix(&leftExpression);
+        }
+
+        ast::Expression* Parser::parseIdentifier(parser::Parser& p) {
+            return new ast::Identifier(
+                    p.curToken,
+                    p.curToken.getLiteral()
+                    );
+        }
 
 
     }

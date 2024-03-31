@@ -7,6 +7,24 @@
 
 namespace monkey {
     namespace parser {
+        // 定义函数指针类型 返回 ast::Expression() 的函数 的指针 为 prefixParseFn
+        typedef ast::Expression (*prefixParseFn)(ast::Expression**);
+
+        // 定义函数指针类型 返回 ast::Expression(), 参数为 ast::Expression() 的 函数 的指针为 infixParseFn
+        typedef ast::Expression (*infixParseFn) (ast::Expression);
+
+        /**
+         * 枚举类型，表示 PRECEDENCE 优先级
+         */
+        enum PRECEDENCE {
+            LOWEST = 0, // 最低的优先级
+            EQUALS, // =
+            LESS_GREATER, // > <
+            SUM, // +
+            PRODUCT, //*
+            PREFIX, // -X or !X
+            CALL // myFunction(x)
+        };
 
         // 语法解析器
         class Parser {
@@ -17,6 +35,12 @@ namespace monkey {
             token::Token peekToken; // 下一个词法单元
 
             vector<string> errors; // 错误处理
+
+            // 前缀函数映射集
+            map<token::TokenType, prefixParseFn> prefixParseFns;
+
+            // 中缀函数映射集
+            map<token::TokenType, infixParseFn> infixParseFns;
 
         private:
             // 构造函数， private， 仅能通过New创建语法解析器
@@ -36,6 +60,25 @@ namespace monkey {
               * @param stmt 指向 return 语句节点指针 的指针
               */
              void parseReturnStatement(ast::ReturnStatement** stmt);
+
+             /**
+              * 解析 expression 语句
+              * @param stmt 指向 expression 语句节点的指针 的指针
+              */
+              void parseExpressionStatement(ast::ExpressionStatement** stmt);
+
+              /**
+               * 解析表达式
+               * @param precedence PRECEDENCE 枚举类型，表示优先级
+               * @param leftExpression ast::Expression*&, 对表达式指针进行修改
+               */
+              void parseExpression(const PRECEDENCE& precedence, ast::Expression*& leftExpression);
+
+              /**
+               * 解析 Identifier 表达式
+               * @param expression 指向Expression** 类型指针 的指针
+               */
+              static ast::Expression* parseIdentifier(parser::Parser& p);
 
             /**
              * 判断当前token的类型是否与想要的一样
@@ -63,6 +106,25 @@ namespace monkey {
              * @param t const token::TokenType&，使用常引用避免额外内存开销
              */
             void peekError(const token::TokenType& t);
+
+
+            /**
+             * 在 parser 的前缀函数映射集中增加函数
+             * @param tokenType token::TokenType
+             * @param fn prefixParseFn
+             */
+            void registerPrefix(const token::TokenType& tokenType, prefixParseFn fn) {
+                prefixParseFns[tokenType] = fn;
+            }
+
+            /**
+             * 在 parser 的中缀函数映射集中增加函数
+             * @param tokenType token::TokenType
+             * @param fn infixParseFn
+             */
+            void registerInfix(const token::TokenType& tokenType, infixParseFn fn) {
+                infixParseFns[tokenType] = fn;
+            }
 
         public:
             /**

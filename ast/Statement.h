@@ -3,7 +3,6 @@
 #ifndef MONKEY_STATEMENT_H
 #define MONKEY_STATEMENT_H
 
-#include "ast.h"
 #include "../token/Token.h"
 #include "Expression.h"
 
@@ -81,6 +80,12 @@ namespace monkey {
             Expression* Expression;
 
         public:
+            /**
+             * 从外部设置 Expression
+             * @param expression  class Expression*& 使用引用，避免复制的时候丢失数据
+             */
+            __attribute__((unused)) void setExpression(class Expression*& expression);;
+
             explicit ExpressionStatement(token::Token token);
 
             void statementNode() override {}
