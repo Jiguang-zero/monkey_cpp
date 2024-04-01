@@ -15,9 +15,6 @@ namespace monkey {
             p->nextToken();
             p->nextToken();
 
-            std::cout << "18: \n";
-            std::cout << p->curToken.getLiteral() << std::endl;
-            std::cout << p->peekToken.getLiteral() << std::endl;
 
             // 注册前缀函数
             p->registerPrefix(token::IDENT, &Parser::parseIdentifier);
@@ -164,20 +161,18 @@ namespace monkey {
         }
 
         ast::Expression *Parser::parseExpression(const PRECEDENCE &precedence) {
-            std::cout << "163: " << curToken.getType() << " " << curToken.getLiteral() << std::endl; std::cout << "163: " << peekToken.getType() << std::endl;
             auto prefix = prefixParseFns[curToken.getType()];
             if (prefix == nullptr) {
                 noPrefixParseFnError(curToken.getType());
                 return nullptr;
             }
+
             auto* leftExp = new ast::Expression();
-            leftExp = (this->*prefix)(); std::cout << "170: peekToken.Literal: " << peekToken.getLiteral() << std::endl;
-            std::cout << "171: " << precedence << " " << peekPrecedence() << std::endl;
+            leftExp = (this->*prefix)();
+
             while (!peekTokenIs(token::SEMICOLON) && precedence < peekPrecedence()) {
                 auto infix = infixParseFns[peekToken.getType()];
-                std::cout << "174: " << std::endl;
                 if (infix == nullptr) {
-                    std::cout << "176: " << std::endl;
                     return leftExp;
                 }
 
@@ -231,30 +226,10 @@ namespace monkey {
         }
 
         PRECEDENCE Parser::peekPrecedence() {
-//            auto it = precedences.find(peekToken.getType());
-//            std::cout << "235: " << " test precedences." << std::endl;
-//
-//            for (auto& i : precedences) {
-//                std::cout << i.first << " " << i.second << std::endl;
-//            }
-//            std::cout << "240: " << " test precedences end" << std::endl;
-//
-//            if (it != precedences.end()) {
-//                std::cout << "232: " <<  it->second << std::endl;
-//                return it->second;
-//            }
-//
-//            return LOWEST;
             return getPrecedenceWithTokenType(peekToken.getType());
         }
 
         PRECEDENCE Parser::curPrecedence() {
-//            auto it = precedences.find(curToken.getType());
-//            if (it != precedences.end()) {
-//                return it->second;
-//            }
-//
-//            return LOWEST;
             return getPrecedenceWithTokenType(curToken.getType());
         }
 
@@ -280,21 +255,6 @@ namespace monkey {
             return expression;
         }
 
-    }
-
-
-    // 定义变量
-    namespace parser {
-        map<token::TokenType, PRECEDENCE> Parser::precedences = {
-                {token::EQ,         EQUALS},
-                {token::NOT_EQ,     EQUALS},
-                {token::LT,         LESS_GREATER},
-                {token::GT,         LESS_GREATER},
-                {token::PLUS,       SUM},
-                {token::MINUS,      SUM},
-                {token::SLASH,      PRODUCT},
-                {token::ASTERISK,   PRODUCT}
-        };
 
         PRECEDENCE Parser::getPrecedenceWithTokenType(const token::TokenType& type) {
             if (type == token::EQ || type == token::NOT_EQ) {

@@ -51,6 +51,24 @@ namespace monkey {
 
             /**
              * 获取下一个词法单元的优先级
+             * @oldVersion
+             *
+             *  map<token::TokenType, PRECEDENCE> Parser::precedences = {
+                {token::EQ,         EQUALS},
+                {token::NOT_EQ,     EQUALS},
+                {token::LT,         LESS_GREATER},
+                {token::GT,         LESS_GREATER},
+                {token::PLUS,       SUM},
+                {token::MINUS,      SUM},
+                {token::SLASH,      PRODUCT},
+                {token::ASTERISK,   PRODUCT}
+                };
+                但是作为这个哈希映射作为局部变量也好，作为全局变量也好，会提示警告
+                token::EQ可能为未义。
+                通过测试 peekToken 的优先级，会发现为0，也就是哈希映射中找不到
+                因为 token::EQ 作为静态编译，声明与定义是分开的。
+
+                在此采用了稍微不那么高雅的解决方案，就是直接if语句选择优先级
              * @return PRECEDENCE 枚举类型
              */
             PRECEDENCE peekPrecedence();
@@ -181,8 +199,6 @@ namespace monkey {
 
 
         public:
-            static map<token::TokenType, PRECEDENCE> precedences;
-
             /**
              * 新建一个语法解析器
              * @param l Lexer*, 传入一个词法解析器的指针

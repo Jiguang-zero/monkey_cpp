@@ -356,10 +356,8 @@ void testParsingInfixExpressions() {
 
     bool flag(true);
 
-    int i = 0;
 
-    for (auto test : tests) {
-        cout << "Round " << i++ << ": " << endl;
+    for (const auto& test : tests) {
 
         auto * l = lexer::Lexer::New(test.input);
         auto * p = parser::Parser::New(l);
