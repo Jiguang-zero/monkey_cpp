@@ -6,14 +6,19 @@
 #include <iostream>
 #include <vector>
 #include "typeinfo"
+#include <tuple>
 
 
 using std::vector;
+using std::tuple;
 using std::cout;
 using std::endl;
 using std::cerr;
+using std::get;
 
 using namespace monkey;
+
+/******* 辅助函数 *************/
 
 // 如果不加引用，那么传入的是 Statement的拷贝，会造成数据丢失
 // important
@@ -56,6 +61,30 @@ void checkoutParserErrors(parser::Parser* & p) {
     // exit(-1);
 }
 
+// 判断 integer 表达式的数字是否正确
+bool testIntegerLiteral(ast::Expression* expression, long long value) {
+    auto * integer = dynamic_cast<ast::IntegerLiteral *>(expression);
+
+    if (!integer) {
+        cout << "Get IntegerLiteral Failed." << endl;
+        return false;
+    }
+
+    if (integer->getValue() != value) {
+        cout << "integer.Value not " << value << " but " << integer->getValue() << endl;
+        return false;
+    }
+
+    if (integer->TokenLiteral() != std::to_string(value)) {
+        cout << "integer.TokenLiteral not " << std::to_string(value);
+        cout << " but " << integer->TokenLiteral() << endl;
+        return false;
+    }
+
+    return true;
+}
+
+/************ 测试函数 ****************/
 // 测试 let 语句
 void testLetStatements() {
     string input =
@@ -100,7 +129,7 @@ void testLetStatements() {
 
 
 
-    cout << "Test testLetStatements() end: " << (flag ? "PASS" : "FAIL") << endl;
+    cout << "Test testLetStatements() END: " << (flag ? "PASS" : "FAIL") << endl;
 
 }
 
@@ -141,9 +170,10 @@ void testReturnStatements() {
         }
     }
 
-    cout << "Test testReturnStatements() end: " << (flag ? "PASS" : "FAIL") << endl;
+    cout << "Test testReturnStatements() END: " << (flag ? "PASS" : "FAIL") << endl;
 }
 
+// 测试标识符
 void testIdentifierExpression() {
     string input = "foo_bar";
 
@@ -164,7 +194,7 @@ void testIdentifierExpression() {
         flag = false;
     }
 
-    auto* stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
     if (!stmt) {
         cerr << "get ExpressionStatement Failed." << endl;
         return;
@@ -186,5 +216,201 @@ void testIdentifierExpression() {
         flag = false;
     }
 
-    cout << "Test testIdentifierExpression() end: " << (flag ? "PASS" : "FAIL") << endl;
+    cout << "Test testIdentifierExpression() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+// 测试整数类型
+void testIntegerLiteralExpression() {
+    cout << "Test testIntegerLiteralExpression() START: " << endl;
+
+    string input = "5;";
+
+    auto l = lexer::Lexer::New(input);
+
+    auto p = parser::Parser::New(l);
+
+    auto* program = p->ParseProgram();
+
+    bool flag(true);
+
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program has not enough statements. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * literal = dynamic_cast<ast::IntegerLiteral *>(stmt->getExpression());
+    if (!literal) {
+        cerr << "get ast::literal Failed." << endl;
+        return;
+    }
+
+    if (literal->getValue() != 5) {
+        cout << "literal.value not 5, but " << literal->getValue() << endl;
+        flag = false;
+    }
+
+    if (literal->TokenLiteral() != "5") {
+        cout << "literal.TokenLiteral() not \"5\", but " << literal->TokenLiteral() << endl;
+        flag = false;
+    }
+
+    cout << "Test testIntegerLiteralExpression() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+// 测试前缀表达式
+void testParsingPrefixExpressions() {
+    cout << "Test testParsingPrefixExpressions() START:" << endl;
+
+    typedef tuple<string, string, long long> prefixTests;
+
+    vector<prefixTests> tests = {
+            {"!5;", "!", 5},
+            {"-632; ", "-", 632}
+    };
+
+    bool flag(true);
+
+    for (auto test : tests) {
+        auto * l = lexer::Lexer::New(get<0>(test));
+        auto * p = parser::Parser::New(l);
+
+        auto * program = p->ParseProgram();
+        checkoutParserErrors(p);
+
+        if (program->getStatements().size() != 1) {
+            cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+            flag = false;
+        }
+
+        auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+        if (!stmt) {
+            cerr << "get ast::ExpressionStatement Failed." << endl;
+            return;
+        }
+
+        auto * exp = dynamic_cast<ast::PrefixExpression *>(stmt->getExpression());
+        if (!exp) {
+            cerr << "get ast::PrefixExpression Failed." << endl;
+        }
+
+        if (exp->getOperator() != get<1>(test)) {
+            flag = false;
+            cout << "exp.Operator not " << get<1>(test) << " but " << exp->getOperator() << endl;
+        }
+
+        if (!testIntegerLiteral(exp->getRightExpression(), get<2>(test))) {
+            flag = false;
+        }
+
+        // 释放空间
+        delete exp;
+        delete stmt;
+        delete program;
+        delete p;
+        delete l;
+    }
+
+    cout << "Test testParsingPrefixExpressions() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testParsingInfixExpressions() {
+    cout << "Test testParsingInfixExpressions() START:" << endl;
+
+    struct infixTest {
+        string input;
+        long long leftValue;
+        string op; // operator
+        long long rightValue;
+
+        infixTest(
+                string i,
+                long long lV,
+                string o,
+                long long rV
+                ) {
+            input = i;
+            leftValue = lV;
+            op = o;
+            rightValue = rV;
+        }
+    };
+
+    vector<infixTest> tests = {
+            infixTest("5 + 5", 5, "+", 5),
+            infixTest("5 - 5", 5, "-", 5),
+            infixTest("5 * 5", 5, "*", 5),
+            infixTest("5 / 5", 5, "/", 5),
+            infixTest("5 > 5", 5, ">", 5),
+            infixTest("5 < 5", 5, "<", 5),
+            infixTest("5 == 5", 5, "==", 5),
+            infixTest("5 != 5", 5, "!=", 5)
+    };
+
+    bool flag(true);
+
+    int i = 0;
+
+    for (auto test : tests) {
+        cout << "Round " << i++ << ": " << endl;
+
+        auto * l = lexer::Lexer::New(test.input);
+        auto * p = parser::Parser::New(l);
+
+        auto * program = p->ParseProgram();
+        checkoutParserErrors(p);
+
+        if (program->getStatements().size() != 1) {
+            cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+            flag = false;
+        }
+
+        auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+        if (!stmt) {
+            cerr << "get ast::ExpressionStatement Failed." << endl;
+            return;
+        }
+
+        auto * exp = dynamic_cast<ast::InfixExpression *>(stmt->getExpression());
+        if (!exp) {
+            cerr << "get ast::InfixExpression Failed." << endl;
+            return;
+        }
+
+        if (!testIntegerLiteral(exp->getLeft(), test.leftValue)) {
+            flag = false;
+        }
+        if (exp->getOperator() != test.op) {
+            cout << "exp.Operator() not " << test.op;
+            cout << " but " << exp->getOperator() << endl;
+            flag = false;
+        }
+        if (!testIntegerLiteral(exp->getRight(), test.rightValue)) {
+            flag = false;
+        }
+
+        // 释放空间
+        delete exp;
+        exp = 0;
+        delete stmt;
+        stmt = 0;
+        delete program;
+        program = 0;
+        delete p;
+        p = 0;
+        delete l;
+        l = 0;
+    }
+
+    cout << "Test testParsingInfixExpressions() END: " << (flag ? "PASS" : "FAIL") << endl;
+
+
+
 }

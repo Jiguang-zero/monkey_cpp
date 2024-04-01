@@ -7,6 +7,20 @@
 
 namespace monkey {
     namespace parser {
+        /**
+         * 枚举类型，表示 PRECEDENCE 优先级
+         */
+        enum PRECEDENCE {
+            LOWEST = 0, // 最低的优先级
+            EQUALS, // == , !=
+            LESS_GREATER, // > <
+            SUM, // +
+            PRODUCT, //*
+            PREFIX, // -X or !X
+            CALL // myFunction(x)
+        };
+
+
 
         // 先声明类 Parser
         class Parser;
@@ -17,18 +31,7 @@ namespace monkey {
         // 定义函数指针类型 返回 ast::Expression(), 参数为 ast::Expression() 的 函数 的指针为 infixParseFn
         typedef ast::Expression* (Parser::*infixParseFn) (ast::Expression*);
 
-        /**
-         * 枚举类型，表示 PRECEDENCE 优先级
-         */
-        enum PRECEDENCE {
-            LOWEST = 0, // 最低的优先级
-            EQUALS, // =
-            LESS_GREATER, // > <
-            SUM, // +
-            PRODUCT, //*
-            PREFIX, // -X or !X
-            CALL // myFunction(x)
-        };
+
 
         // 语法解析器
         class Parser {
@@ -46,12 +49,37 @@ namespace monkey {
             // 中缀函数映射集
             map<token::TokenType, infixParseFn> infixParseFns;
 
+            /**
+             * 获取下一个词法单元的优先级
+             * @return PRECEDENCE 枚举类型
+             */
+            PRECEDENCE peekPrecedence();
+
+            /**
+             * 获取当前词法单元的优先级
+             * @return PRECEDENCE 枚举类型
+             */
+            PRECEDENCE curPrecedence();
+
         private:
+            /**
+             * 从 token::TokenType 获取 优先级
+             * @param type token::TokenType
+             * @return PRECEDENCE
+             */
+            static PRECEDENCE getPrecedenceWithTokenType(const token::TokenType& type);
+
             // 构造函数， private， 仅能通过New创建语法解析器
             explicit Parser(lexer::Lexer* _l);
 
             // 获取下一个词法单元 Token
             void nextToken();
+
+            /**
+             * 如果没有前缀表达式的相关函数，则添加错误信息
+             * @param t 需要的前缀表达式的符号
+             */
+            void noPrefixParseFnError(const token::TokenType& t);
 
 
              /**
@@ -59,7 +87,6 @@ namespace monkey {
               * @return ast::LetStatement* 返回指向 let 语句节点的指针
               */
              ast::LetStatement* parseLetStatement();
-
 
              /**
               * 解析 return 语句
@@ -76,28 +103,34 @@ namespace monkey {
               /**
                * 解析表达式
                * @param precedence PRECEDENCE 枚举类型，表示优先级
-               * @param leftExpression ast::Expression*&, 对表达式指针进行修改
-               */
-              // void parseExpression(const PRECEDENCE& precedence, ast::Expression*& leftExpression);
-
-              /**
-               * 解析表达式
-               * @param precedence PRECEDENCE 枚举类型，表示优先级
                * @return ast::Expression* 指向表达式的指针
                */
               ast::Expression* parseExpression(const PRECEDENCE& precedence);
 
               /**
                * 解析 Identifier 表达式
-               * @param expression 指向Expression** 类型指针 的指针
-               */
-              // static ast::Expression* parseIdentifier(parser::Parser& p);
-
-              /**
-               * 解析 Identifier 表达式
                * @return ast::Expression*
                */
               ast::Expression* parseIdentifier();
+
+              /**
+               * 解析 IntegerLiteral 表达式
+               * @return ast::Expression* 返回指针
+               */
+              ast::Expression* parseIntegerLiteral();
+
+              /**
+               * 解析 prefix 表达式
+               * @return ast::Expression*
+               */
+              ast::Expression* parsePrefixExpression();
+
+              /**
+               * 解析 infix 表达式
+               * @param left  Expression*
+               * @return ast::Expression*
+               */
+              ast::Expression* parseInfixExpression(ast::Expression* left);
 
             /**
              * 判断当前token的类型是否与想要的一样
@@ -141,11 +174,15 @@ namespace monkey {
              * @param tokenType token::TokenType
              * @param fn infixParseFn
              */
-            void registerInfix(const token::TokenType& tokenType, infixParseFn fn) {
+            void registerInfix(const token::TokenType &tokenType, infixParseFn fn) {
                 infixParseFns[tokenType] = fn;
             }
 
+
+
         public:
+            static map<token::TokenType, PRECEDENCE> precedences;
+
             /**
              * 新建一个语法解析器
              * @param l Lexer*, 传入一个词法解析器的指针

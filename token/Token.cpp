@@ -38,41 +38,41 @@ namespace monkey {
     } // token
 
     namespace token {
-        TokenType ILLEGAL = "ILLEGAL";
-        TokenType TOKEN_EOF = "EOF";
+        const TokenType ILLEGAL = "ILLEGAL";
+        const TokenType TOKEN_EOF = "EOF";
 
-        TokenType STRING = "STRING";
-        TokenType INTEGER = "INT";
+        const TokenType STRING = "STRING";
+        const TokenType INTEGER = "INT";
 
-        TokenType ASSIGN = "=";
-        TokenType PLUS = "+";
-        TokenType MINUS = "-";
-        TokenType ASTERISK = "*";
-        TokenType SLASH = "/";
+        const TokenType ASSIGN = "=";
+        const TokenType PLUS = "+";
+        const TokenType MINUS = "-";
+        const TokenType ASTERISK = "*";
+        const TokenType SLASH = "/";
 
-        TokenType BANG = "!";
-        TokenType LT = "<";
-        TokenType GT = ">";
-        TokenType EQ = "==";
-        TokenType NOT_EQ = "!=";
+        const TokenType BANG = "!";
+        const TokenType LT = "<";
+        const TokenType GT = ">";
+        const TokenType EQ = "==";
+        const TokenType NOT_EQ = "!=";
 
-        TokenType COMMA = ",";
-        TokenType SEMICOLON = ";";
+        const TokenType COMMA = ",";
+        const TokenType SEMICOLON = ";";
 
-        TokenType IDENT = "IDENT";
+        const TokenType IDENT = "IDENT";
 
-        TokenType LPAREN = "(";
-        TokenType RPAREN = ")";
-        TokenType LBRACE = "{";
-        TokenType RBRACE = "}";
+        const TokenType LPAREN = "(";
+        const TokenType RPAREN = ")";
+        const TokenType LBRACE = "{";
+        const TokenType RBRACE = "}";
 
-        TokenType FUNCTION = "FUNCTION";
-        TokenType LET = "LET";
-        TokenType TOKEN_TRUE = "TOKEN_TRUE";
-        TokenType TOKEN_FALSE = "TOKEN_FALSE";
-        TokenType RETURN = "RETURN";
-        TokenType IF = "IF";
-        TokenType ELSE = "ELSE";
+        const TokenType FUNCTION = "FUNCTION";
+        const TokenType LET = "LET";
+        const TokenType TOKEN_TRUE = "TOKEN_TRUE";
+        const TokenType TOKEN_FALSE = "TOKEN_FALSE";
+        const TokenType RETURN = "RETURN";
+        const TokenType IF = "IF";
+        const TokenType ELSE = "ELSE";
 
 
         map<string, TokenType > keywords = {

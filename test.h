@@ -28,6 +28,12 @@ void testParser() {
 
     testIdentifierExpression();
 
+    testIntegerLiteralExpression();
+
+    testParsingPrefixExpressions();
+
+    testParsingInfixExpressions();
+
     cout << "Test parser END" << endl;
 
     cout << endl;

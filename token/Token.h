@@ -63,52 +63,51 @@ namespace monkey {
              * @return string
              */
             string String();
-
         };
 
-        extern TokenType ILLEGAL; // 非法单元
+        extern const TokenType ILLEGAL; // 非法单元
 
-        extern TokenType TOKEN_EOF; // 结束单元
+        extern const TokenType TOKEN_EOF; // 结束单元
 
         // 数据类型
-        extern TokenType STRING; // 字符串单元
-        extern TokenType INTEGER; // 整数单元
+        extern const TokenType STRING; // 字符串单元
+        extern const TokenType INTEGER; // 整数单元
         //TODO: 增加浮点数类型
 
         // 运算符号
-        extern TokenType ASSIGN; // 赋值符号单元 =
-        extern TokenType PLUS; // 加号 +
-        extern TokenType MINUS; // 减号 -
-        extern TokenType ASTERISK; // 星号 *
-        extern TokenType SLASH; // 斜线 /(除法)
+        extern const TokenType ASSIGN; // 赋值符号单元 =
+        extern const TokenType PLUS; // 加号 +
+        extern const TokenType MINUS; // 减号 -
+        extern const TokenType ASTERISK; // 星号 *
+        extern const TokenType SLASH; // 斜线 /(除法)
 
         // 条件运算符号
-        extern TokenType BANG; // 感叹号 !
-        extern TokenType LT; // 小于号 < less than
-        extern TokenType GT; // 大于号 > greater than
-        extern TokenType EQ; // 相等 == equal
-        extern TokenType NOT_EQ; // 不相等 != equal
+        extern const TokenType BANG; // 感叹号 !
+        extern const TokenType LT; // 小于号 < less than
+        extern const TokenType GT; // 大于号 > greater than
+        extern const TokenType EQ; // 相等 == equal
+        extern const TokenType NOT_EQ; // 不相等 != equal
 
         // 分隔符
-        extern TokenType COMMA; // 逗号
-        extern TokenType SEMICOLON; // 分号
+        extern const TokenType COMMA; // 逗号
+        extern const TokenType SEMICOLON; // 分号
 
         // 标识符
-        extern TokenType IDENT; // 参数名等
+        extern const TokenType IDENT; // 参数名等
 
-        extern TokenType LPAREN; // 左括号 (
-        extern TokenType RPAREN; // 右括号 )
-        extern TokenType LBRACE; // 左大括号 {
-        extern TokenType RBRACE; // 右大括号
+        extern const TokenType LPAREN; // 左括号 (
+        extern const TokenType RPAREN; // 右括号 )
+        extern const TokenType LBRACE; // 左大括号 {
+        extern const TokenType RBRACE; // 右大括号
 
         // 关键字
-        extern TokenType FUNCTION; // 函数关键字 fn
-        extern TokenType LET; // 关键字 let
-        extern TokenType TOKEN_TRUE; // 关键字 true
-        extern TokenType TOKEN_FALSE; // 关键字 false
-        extern TokenType IF; // 关键字 if
-        extern TokenType ELSE; // 关键字 else
-        extern TokenType RETURN; // 关键字 return
+        extern const TokenType FUNCTION; // 函数关键字 fn
+        extern const TokenType LET; // 关键字 let
+        extern const TokenType TOKEN_TRUE; // 关键字 true
+        extern const TokenType TOKEN_FALSE; // 关键字 false
+        extern const TokenType IF; // 关键字 if
+        extern const TokenType ELSE; // 关键字 else
+        extern const TokenType RETURN; // 关键字 return
 
         extern map<string, TokenType > keywords;
 
