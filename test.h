@@ -34,6 +34,10 @@ void testParser() {
 
     testParsingInfixExpressions();
 
+    testOperatorPrecedenceParsing();
+
+    testBooleanExpression();
+
     cout << "Test parser END" << endl;
 
     cout << endl;

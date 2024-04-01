@@ -52,7 +52,6 @@ namespace monkey {
             /**
              * 获取下一个词法单元的优先级
              * @oldVersion
-             *
              *  map<token::TokenType, PRECEDENCE> Parser::precedences = {
                 {token::EQ,         EQUALS},
                 {token::NOT_EQ,     EQUALS},
@@ -68,7 +67,7 @@ namespace monkey {
                 通过测试 peekToken 的优先级，会发现为0，也就是哈希映射中找不到
                 因为 token::EQ 作为静态编译，声明与定义是分开的。
 
-                在此采用了稍微不那么高雅的解决方案，就是直接if语句选择优先级
+             * @newVersion 在此采用了稍微不那么高雅的解决方案，就是直接if语句选择优先级
              * @return PRECEDENCE 枚举类型
              */
             PRECEDENCE peekPrecedence();
@@ -143,12 +142,20 @@ namespace monkey {
                */
               ast::Expression* parsePrefixExpression();
 
+
+              /**
+               * 解析 boolean 表达式
+               * @return ast::Expression*
+               */
+              ast::Expression* parseBoolean();
+
               /**
                * 解析 infix 表达式
                * @param left  Expression*
                * @return ast::Expression*
                */
               ast::Expression* parseInfixExpression(ast::Expression* left);
+
 
             /**
              * 判断当前token的类型是否与想要的一样

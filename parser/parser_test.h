@@ -4,6 +4,7 @@
 
 #include "Parser.h"
 #include <iostream>
+#include <utility>
 #include <vector>
 #include "typeinfo"
 #include <tuple>
@@ -47,7 +48,7 @@ bool testLetStatement(ast::Statement& s, const string& name) {
 void checkoutParserErrors(parser::Parser* & p) {
     auto errors = p->getErrors();
     if (errors.empty()) {
-        // cout << "no errors " << endl;
+        // print "no errors "
         return;
     }
 
@@ -336,9 +337,9 @@ void testParsingInfixExpressions() {
                 string o,
                 long long rV
                 ) {
-            input = i;
+            input = std::move(i);
             leftValue = lV;
-            op = o;
+            op = std::move(o);
             rightValue = rV;
         }
     };
@@ -396,19 +397,130 @@ void testParsingInfixExpressions() {
 
         // ÊÍ·Å¿Õ¼ä
         delete exp;
-        exp = 0;
+        exp = nullptr;
         delete stmt;
-        stmt = 0;
+        stmt = nullptr;
         delete program;
-        program = 0;
+        program = nullptr;
         delete p;
-        p = 0;
+        p = nullptr;
         delete l;
-        l = 0;
+        l = nullptr;
     }
 
     cout << "Test testParsingInfixExpressions() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
 
+void testOperatorPrecedenceParsing() {
+    cout << "Test testOperatorPrecedenceParsing() START: " << endl;
 
+    bool flag(true);
 
+    struct TestType {
+        string input;
+        string expected;
+
+        TestType(string input, string expected) {
+            this->input = std::move(input);
+            this->expected = std::move(expected);
+        }
+    };
+
+    vector<TestType> tests = {
+            TestType("-a * b", "((-a) * b)"),
+            TestType("!-a", "(!(-a))"),
+            TestType("a + b + c", "((a + b) + c)"),
+            TestType("a + b - c", "((a + b) - c)"),
+            TestType("a + b / c", "(a + (b / c))"),
+            TestType("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
+            TestType("3 + 4; -5 * 5", "(3 + 4)((-5) * 5)"),
+            TestType("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))")
+    };
+
+    for (const auto& test : tests) {
+        auto * l = lexer::Lexer::New(test.input);
+        auto * p = parser::Parser::New(l);
+
+        auto * program = p->ParseProgram();
+        checkoutParserErrors(p);
+
+        string actual = program->String();
+        if (actual != test.expected) {
+            flag = false;
+            cout << "expected: " << test.expected << ". got: " << actual << endl;
+        }
+
+        delete program;
+        program = nullptr;
+
+        delete p;
+        p = nullptr;
+
+        delete l;
+        l = nullptr;
+    }
+
+    cout << "Test testOperatorPrecedenceParsing() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testBooleanExpression() {
+    cout << "Test testBooleanExpression() START: " << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        bool value;
+
+        TestType(string i, bool v) {
+            input = std::move(i);
+            value = v;
+        }
+    };
+
+    vector<TestType> tests = {
+            TestType("true", true),
+            TestType("false", false)
+    };
+
+    for (const auto & test : tests) {
+        auto * l = lexer::Lexer::New(test.input);
+        auto * p = parser::Parser::New(l);
+
+        auto * program = p->ParseProgram();
+        checkoutParserErrors(p);
+
+        if (program->getStatements().size() != 1) {
+            cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+            flag = false;
+        }
+
+        auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+        if (!stmt) {
+            cerr << "get ast::ExpressionStatement Failed." << endl;
+            return;
+        }
+
+        auto * expression = dynamic_cast<ast::Boolean *>(stmt->getExpression());
+        if (!expression) {
+            cerr << "get ast::Boolean Failed." << endl;
+            return;
+        }
+
+        auto fn = [&] () -> string {
+            return test.value ? "true" : "false";
+        };
+
+        if (expression->TokenLiteral() != fn()) {
+            cout << "expression.TokenLiteral not " << fn() << " but " << expression->TokenLiteral() << endl;
+            flag = false;
+        }
+
+        if (expression->getValue() != test.value) {
+            cout << "expression.Value not " << test.value << " but " << expression->getValue() << endl;
+            flag = false;
+        }
+    }
+
+    cout << "Test testBooleanExpression() END: " << (flag ? "PASS" : "FAIL") << endl;
 }

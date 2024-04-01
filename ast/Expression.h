@@ -181,6 +181,24 @@ namespace monkey {
 
         };
 
+        class Boolean : virtual public Expression {
+        private:
+            token::Token Token; // 布尔值词法单元
+            bool Value;
+
+        public:
+            Boolean(token::Token token, bool value);
+
+            __attribute__((unused)) bool getValue() const;
+
+            void expressionNode() override {}
+
+            string TokenLiteral() override;
+
+            string String() override;
+
+        };
+
     } // ast
 
 } // monkey

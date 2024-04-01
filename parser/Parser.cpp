@@ -11,16 +11,13 @@ namespace monkey {
         Parser* Parser::New(lexer::Lexer* l) {
             auto* p = new Parser(l);
 
-            // 设置 curToken
-            p->nextToken();
-            p->nextToken();
-
-
             // 注册前缀函数
             p->registerPrefix(token::IDENT, &Parser::parseIdentifier);
             p->registerPrefix(token::INTEGER, &Parser::parseIntegerLiteral);
             p->registerPrefix(token::BANG, &Parser::parsePrefixExpression);
             p->registerPrefix(token::MINUS, &Parser::parsePrefixExpression);
+            p->registerPrefix(token::TOKEN_TRUE, &Parser::parseBoolean);
+            p->registerPrefix(token::TOKEN_FALSE, &Parser::parseBoolean);
 
             // 注册中缀函数
             p->registerInfix(token::PLUS, &Parser::parseInfixExpression);
@@ -31,6 +28,10 @@ namespace monkey {
             p->registerInfix(token::NOT_EQ, &Parser::parseInfixExpression);
             p->registerInfix(token::LT, &Parser::parseInfixExpression);
             p->registerInfix(token::GT, &Parser::parseInfixExpression);
+
+            // 设置 curToken 与 peekToken
+            p->nextToken();
+            p->nextToken();
 
             return p;
         }
@@ -270,6 +271,16 @@ namespace monkey {
                 return PRODUCT;
             }
             return LOWEST;
+        }
+
+        ast::Expression *Parser::parseBoolean() {
+            auto expression = new ast::Expression();
+
+            auto boolExpression = new ast::Boolean(curToken, curTokenIs(token::TOKEN_TRUE));
+
+            expression = boolExpression;
+
+            return expression;
         }
     }
 

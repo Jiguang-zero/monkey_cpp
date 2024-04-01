@@ -115,6 +115,23 @@ namespace monkey {
         __attribute__((unused)) string InfixExpression::getOperator() {
             return Operator;
         }
+
+        Boolean::Boolean(token::Token token, bool value) {
+            Token = std::move(token);
+            Value = value;
+        }
+
+        string Boolean::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        string Boolean::String() {
+            return Token.getLiteral();
+        }
+
+        bool Boolean::getValue() const {
+            return Value;
+        }
     }
 
 }
