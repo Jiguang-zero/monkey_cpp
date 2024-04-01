@@ -7,11 +7,15 @@
 
 namespace monkey {
     namespace parser {
+
+        // 先声明类 Parser
+        class Parser;
+
         // 定义函数指针类型 返回 ast::Expression() 的函数 的指针 为 prefixParseFn
-        typedef ast::Expression (*prefixParseFn)(ast::Expression**);
+        typedef ast::Expression* (Parser::*prefixParseFn)();
 
         // 定义函数指针类型 返回 ast::Expression(), 参数为 ast::Expression() 的 函数 的指针为 infixParseFn
-        typedef ast::Expression (*infixParseFn) (ast::Expression);
+        typedef ast::Expression* (Parser::*infixParseFn) (ast::Expression*);
 
         /**
          * 枚举类型，表示 PRECEDENCE 优先级
@@ -49,36 +53,51 @@ namespace monkey {
             // 获取下一个词法单元 Token
             void nextToken();
 
-            /**
-             * 解析 let 语句
-             * @param stmt 指向 let语句节点的指针 的指针
-             */
-             void parseLetStatement(ast::LetStatement** stmt);
+
+             /**
+              * 解析 let 语句
+              * @return ast::LetStatement* 返回指向 let 语句节点的指针
+              */
+             ast::LetStatement* parseLetStatement();
+
 
              /**
               * 解析 return 语句
-              * @param stmt 指向 return 语句节点指针 的指针
+              * @return ast::ReturnStatement* 指向 return 语句节点的指针
               */
-             void parseReturnStatement(ast::ReturnStatement** stmt);
+             ast::ReturnStatement* parseReturnStatement();
 
-             /**
-              * 解析 expression 语句
-              * @param stmt 指向 expression 语句节点的指针 的指针
-              */
-              void parseExpressionStatement(ast::ExpressionStatement** stmt);
+              /**
+               * 解析 expression 语句
+               * @return ast::ExpressionStatement* 指向 expression 语句节点的指针
+               */
+              ast::ExpressionStatement* parseExpressionStatement();
 
               /**
                * 解析表达式
                * @param precedence PRECEDENCE 枚举类型，表示优先级
                * @param leftExpression ast::Expression*&, 对表达式指针进行修改
                */
-              void parseExpression(const PRECEDENCE& precedence, ast::Expression*& leftExpression);
+              // void parseExpression(const PRECEDENCE& precedence, ast::Expression*& leftExpression);
+
+              /**
+               * 解析表达式
+               * @param precedence PRECEDENCE 枚举类型，表示优先级
+               * @return ast::Expression* 指向表达式的指针
+               */
+              ast::Expression* parseExpression(const PRECEDENCE& precedence);
 
               /**
                * 解析 Identifier 表达式
                * @param expression 指向Expression** 类型指针 的指针
                */
-              static ast::Expression* parseIdentifier(parser::Parser& p);
+              // static ast::Expression* parseIdentifier(parser::Parser& p);
+
+              /**
+               * 解析 Identifier 表达式
+               * @return ast::Expression*
+               */
+              ast::Expression* parseIdentifier();
 
             /**
              * 判断当前token的类型是否与想要的一样
@@ -113,7 +132,7 @@ namespace monkey {
              * @param tokenType token::TokenType
              * @param fn prefixParseFn
              */
-            void registerPrefix(const token::TokenType& tokenType, prefixParseFn fn) {
+            void registerPrefix(const token::TokenType &tokenType, prefixParseFn fn) {
                 prefixParseFns[tokenType] = fn;
             }
 
@@ -136,16 +155,16 @@ namespace monkey {
 
             /**
              * 解析 program
-             * @param program  指向 program 节点 (ast的根节点) 的指针 的指针
+             * @return ast::Program 指向program节点的指针
              */
-            void ParseProgram(ast::Program** program);
+            ast::Program* ParseProgram();
 
 
             /**
              * 解析 statement
-             * @param stmt  指向statement 节点的指针
+             * @return ast::Statement* 指向语句节点的指针
              */
-            void parseStatement(ast::Statement** stmt);
+            ast::Statement* parseStatement();
 
             /**
              * 获取 parser 的错误信息

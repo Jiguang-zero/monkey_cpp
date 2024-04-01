@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include <iostream>
+#include <functional>
 
 namespace monkey {
     namespace parser {
@@ -10,6 +11,7 @@ namespace monkey {
         Parser* Parser::New(lexer::Lexer* l) {
             auto* p = new Parser(l);
 
+            p->registerPrefix(token::IDENT, &Parser::parseIdentifier);
 
 
             // 设置 curToken
@@ -22,86 +24,6 @@ namespace monkey {
         void Parser::nextToken() {
             curToken = peekToken;
             peekToken = l->NextToken();
-        }
-
-        void Parser::ParseProgram(ast::Program** program) {
-            *program = new ast::Program();
-
-            (*program)->setStatements(vector<ast::Statement*>());
-
-            while (curToken.getType() != token::TOKEN_EOF) {
-                auto *stmt = new ast::Statement();
-                parseStatement(&stmt);
-
-                if (stmt != nullptr) {
-                    (*program)->getStatements().emplace_back(stmt);
-
-                }
-                nextToken();
-            }
-        }
-
-
-        void Parser::parseStatement(ast::Statement** statement) {
-            token::TokenType type = curToken.getType();
-
-            if (type == token::LET) {
-                // 转化所有类型的指针
-                parseLetStatement(reinterpret_cast<ast::LetStatement **>(statement));
-            }
-            else if (type == token::RETURN) {
-                parseReturnStatement(reinterpret_cast<ast::ReturnStatement **>(statement));
-            }
-
-            else {
-                parseExpressionStatement(reinterpret_cast<ast::ExpressionStatement **>(statement));
-            }
-        }
-
-        void Parser::parseLetStatement(ast::LetStatement ** stmt) {
-            *stmt = new ast::LetStatement(curToken);
-
-            if (!expectPeek(token::IDENT)) {
-                *stmt = nullptr;
-                return;
-            }
-
-            (*stmt)->setName(new ast::Identifier(curToken, curToken.getLiteral()));
-
-            if (!expectPeek(token::ASSIGN)) {
-                *stmt = nullptr;
-                return;
-            }
-
-
-            while (!curTokenIs(token::SEMICOLON)) {
-                nextToken();
-            }
-        }
-
-        void Parser::parseReturnStatement(ast::ReturnStatement **stmt) {
-            *stmt = new ast::ReturnStatement(curToken);
-
-            nextToken();
-
-            while (!curTokenIs(token::SEMICOLON)) {
-                nextToken();
-            }
-        }
-
-        void Parser::parseExpressionStatement(ast::ExpressionStatement **stmt) {
-            *stmt = new ast::ExpressionStatement(curToken);
-
-            auto expression = new ast::Expression();
-            parseExpression(PRECEDENCE::LOWEST, expression);
-
-            (*stmt)->setExpression(expression);
-
-
-            if (peekTokenIs(token::SEMICOLON)) {
-                nextToken();
-            }
-
         }
 
         bool Parser::curTokenIs(const token::TokenType &t) {
@@ -134,21 +56,117 @@ namespace monkey {
             errors.emplace_back(msg);
         }
 
-        void Parser::parseExpression(const PRECEDENCE &precedence, ast::Expression *&leftExpression) {
-            auto prefix = prefixParseFns[curToken.getType()];
 
-            if (prefix == nullptr) {
-                leftExpression = nullptr;
+
+//        ast::Expression* Parser::parseIdentifier(parser::Parser& p) {
+//            return new ast::Identifier(
+//                    p.curToken,
+//                    p.curToken.getLiteral()
+//                    );
+//        }
+
+
+
+        ast::Program *Parser::ParseProgram() {
+            auto * program = new ast::Program();
+
+            (program)->setStatements(vector<ast::Statement*>());
+
+            while (curToken.getType() != token::TOKEN_EOF) {
+                auto *stmt = new ast::Statement();
+                stmt = parseStatement();
+
+                if (stmt != nullptr) {
+                    (*program).getStatements().emplace_back(stmt);
+
+                }
+                nextToken();
             }
 
-            prefix(&leftExpression);
+            return program;
         }
 
-        ast::Expression* Parser::parseIdentifier(parser::Parser& p) {
-            return new ast::Identifier(
-                    p.curToken,
-                    p.curToken.getLiteral()
-                    );
+        ast::Statement *Parser::parseStatement() {
+            token::TokenType type = curToken.getType();
+            auto * statement = new ast::Statement();
+
+            if (type == token::LET) {
+                statement = parseLetStatement();
+            }
+            else if (type == token::RETURN) {
+                statement = parseReturnStatement();
+            }
+
+            else {
+                statement = parseExpressionStatement();
+            }
+
+            return statement;
+        }
+
+        ast::LetStatement *Parser::parseLetStatement() {
+            auto* stmt = new ast::LetStatement(curToken);
+
+            if (!expectPeek(token::IDENT)) {
+                return nullptr;
+            }
+
+            (*stmt).setName(new ast::Identifier(curToken, curToken.getLiteral()));
+
+            if (!expectPeek(token::ASSIGN)) {
+                return nullptr;
+            }
+
+
+            while (!curTokenIs(token::SEMICOLON)) {
+                nextToken();
+            }
+
+            return stmt;
+        }
+
+        ast::ReturnStatement *Parser::parseReturnStatement() {
+            auto* stmt = new ast::ReturnStatement(curToken);
+
+            nextToken();
+
+            while (!curTokenIs(token::SEMICOLON)) {
+                nextToken();
+            }
+
+            return stmt;
+        }
+
+        ast::ExpressionStatement *Parser::parseExpressionStatement() {
+            auto* stmt = new ast::ExpressionStatement(curToken);
+
+            auto expression = new ast::Expression();
+            expression = parseExpression(PRECEDENCE::LOWEST);
+
+            (*stmt).setExpression(expression);
+
+
+            if (peekTokenIs(token::SEMICOLON)) {
+                nextToken();
+            }
+            return stmt;
+        }
+
+        ast::Expression *Parser::parseExpression(const PRECEDENCE &precedence) {
+            auto prefix = prefixParseFns[curToken.getType()];
+            if (prefix == nullptr) {
+                return nullptr;
+            }
+            auto* leftExp = new ast::Expression();
+            leftExp = (this->*prefix)();
+
+            return leftExp;
+        }
+
+        ast::Expression* Parser::parseIdentifier() {
+            auto * expression = new ast::Expression();
+            expression = new ast::Identifier(curToken, curToken.getLiteral());
+            return expression;
         }
 
 

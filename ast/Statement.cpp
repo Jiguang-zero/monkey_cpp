@@ -85,5 +85,9 @@ namespace monkey {
         void ExpressionStatement::setExpression(class Expression *&expression) {
             Expression = expression;
         }
+
+        class Expression *ExpressionStatement::getExpression() {
+            return Expression;
+        }
     }
 }

@@ -17,6 +17,10 @@ namespace monkey {
         string Identifier::String() {
             return Value;
         }
+
+        string Identifier::getValue() {
+            return Value;
+        }
     }
 
 }

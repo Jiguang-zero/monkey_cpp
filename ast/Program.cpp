@@ -30,7 +30,7 @@ namespace monkey {
         }
 
         Program::Program(vector<Statement *> statements) {
-            Statements = statements;
+            Statements = std::move(statements);
         }
     }
 

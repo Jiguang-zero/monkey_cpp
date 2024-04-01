@@ -26,6 +26,8 @@ void testParser() {
 
     testReturnStatements();
 
+    testIdentifierExpression();
+
     cout << "Test parser END" << endl;
 
     cout << endl;

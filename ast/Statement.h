@@ -92,6 +92,12 @@ namespace monkey {
 
             string TokenLiteral() override;
 
+            /**
+             * 获取 表达式 Expression 的 Expression
+             * @return Expression* 无法从外部修改
+             */
+            class Expression* getExpression();
+
             string String() override;
 
         };

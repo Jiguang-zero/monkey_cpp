@@ -61,22 +61,21 @@ void testLetStatements() {
     string input =
             "let x = 5 ;\n"
             "let foo_bar = 832343;\n";
+
     cout << "Test testLetStatements() Start: " << endl;
 
     auto l = lexer::Lexer::New(input);
     auto p = parser::Parser::New(l);
 
-    auto *program = new ast::Program();
-    p->ParseProgram(&program);
-    checkoutParserErrors(p);
+    auto *program = p->ParseProgram();
 
+    checkoutParserErrors(p);
 
     bool flag = true;
 
     if (program == nullptr) {
-        flag = false;
-
         cerr << "ParseProgram() returned nullptr" << endl;
+        return;
     }
 
     if (program->getStatements().size() != 2) {
@@ -116,16 +115,14 @@ void testReturnStatements() {
     auto l = lexer::Lexer::New(input);
     auto p = parser::Parser::New(l);
 
-    auto *program = new ast::Program();
-    p->ParseProgram(&program);
+    auto *program = p->ParseProgram();
     checkoutParserErrors(p);
 
     bool flag = true;
 
     if (program == nullptr) {
-        flag = false;
-
         cerr << "ParseProgram() returned nullptr" << endl;
+        return;
     }
 
     if (program->getStatements().size() != 3) {
@@ -145,4 +142,49 @@ void testReturnStatements() {
     }
 
     cout << "Test testReturnStatements() end: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testIdentifierExpression() {
+    string input = "foo_bar";
+
+    cout << "Test testIdentifierExpression() Start: " << endl;
+
+    auto l = lexer::Lexer::New(input);
+
+    auto p = parser::Parser::New(l);
+
+    auto *program = p->ParseProgram();
+
+    checkoutParserErrors(p);
+
+    bool flag(true);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program has not enough statements. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto* stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto ident = dynamic_cast<ast::Identifier *>(stmt->getExpression());
+    if (!ident) {
+        cerr << "get Identifier Failed." << endl;
+        return;
+    }
+
+    if (ident->getValue() != "foo_bar") {
+        cout << "ident.Value not foo_bar, but " << ident->getValue() << endl;
+        flag = false;
+    }
+
+    if (ident->TokenLiteral() != "foo_bar") {
+        cout << "ident.TokenLiteral() not foo_bar, but " << ident->TokenLiteral() << endl;
+        flag = false;
+    }
+
+    cout << "Test testIdentifierExpression() end: " << (flag ? "PASS" : "FAIL") << endl;
 }

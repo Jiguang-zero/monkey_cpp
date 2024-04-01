@@ -34,6 +34,12 @@ namespace monkey {
                 Identifier(token::Token t, string v);
 
                 /**
+                 * 返回 Identifier 的 Value (就是字面含义)
+                 * @return string, 不返回引用，无法从外部修改
+                 */
+                string getValue();
+
+                /**
                  * 返回 Identifier 表达式的 String
                  * @return
                  */
