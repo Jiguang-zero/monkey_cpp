@@ -274,7 +274,7 @@ void testParsingPrefixExpressions() {
 
     vector<prefixTests> tests = {
             {"!5;", "!", 5},
-            {"-632; ", "-", 632}
+            {"-632; ", "-", 632},
     };
 
     bool flag(true);
@@ -397,15 +397,11 @@ void testParsingInfixExpressions() {
 
         //  Õ∑≈ø’º‰
         delete exp;
-        exp = nullptr;
         delete stmt;
-        stmt = nullptr;
         delete program;
-        program = nullptr;
         delete p;
         p = nullptr;
         delete l;
-        l = nullptr;
     }
 
     cout << "Test testParsingInfixExpressions() END: " << (flag ? "PASS" : "FAIL") << endl;
@@ -434,7 +430,11 @@ void testOperatorPrecedenceParsing() {
             TestType("a + b / c", "(a + (b / c))"),
             TestType("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
             TestType("3 + 4; -5 * 5", "(3 + 4)((-5) * 5)"),
-            TestType("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))")
+            TestType("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+            TestType("3 > 5 == false", "((3 > 5) == false)"),
+            TestType("3 < 5 == true", "((3 < 5) == true)"),
+            TestType("!(true == true)", "(!(true == true))"),
+            TestType("1 + 3 * (3 / 9) - (3 + 3)", "((1 + (3 * (3 / 9))) - (3 + 3))")
     };
 
     for (const auto& test : tests) {
@@ -451,13 +451,11 @@ void testOperatorPrecedenceParsing() {
         }
 
         delete program;
-        program = nullptr;
 
         delete p;
         p = nullptr;
 
         delete l;
-        l = nullptr;
     }
 
     cout << "Test testOperatorPrecedenceParsing() END: " << (flag ? "PASS" : "FAIL") << endl;
@@ -523,4 +521,39 @@ void testBooleanExpression() {
     }
 
     cout << "Test testBooleanExpression() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testIfElseExpression() {
+    cout << "Test testIfElseExpression() START:" << endl;
+
+    bool flag(true);
+
+    string input = "if (x < y) {x;}";
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * expression = dynamic_cast<ast::IfExpression *>(stmt->getExpression());
+    if (!expression) {
+        cerr << "get ast::IfExpression Failed." << endl;
+        return;
+    }
+
+//    if (!testIntegerLiteral(expression->getCondition(), "x", "<", "y"))/
+
+    cout << "Test testIfElse Expression() END: " << (flag ? "PASS": "FAIL") << endl;
 }

@@ -89,5 +89,27 @@ namespace monkey {
         class Expression *ExpressionStatement::getExpression() {
             return Expression;
         }
+
+        string BlockStatement::String() {
+            std::ostringstream oss;
+
+            for (const auto & statement : Statements) {
+                oss << statement->String();
+            }
+
+            return oss.str();
+        }
+
+        string BlockStatement::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        __attribute__((unused)) BlockStatement::BlockStatement(token::Token token) {
+            Token = std::move(token);
+        }
+
+        __attribute__((unused)) void BlockStatement::setStatements(std::vector<Statement *> &statements) {
+            Statements = statements;
+        }
     }
 }

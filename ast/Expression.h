@@ -7,11 +7,13 @@
 
 #include "ast.h"
 #include "../token/Token.h"
+//#include "Statement.h"
 
 namespace monkey {
 
     namespace ast {
-        
+        class BlockStatement;
+
         /**
          * 标识符 表达式
          * 比如 let a = 2; a 就是标识符
@@ -181,6 +183,9 @@ namespace monkey {
 
         };
 
+        /**
+         * 布尔值表达式
+         */
         class Boolean : virtual public Expression {
         private:
             token::Token Token; // 布尔值词法单元
@@ -190,6 +195,59 @@ namespace monkey {
             Boolean(token::Token token, bool value);
 
             __attribute__((unused)) bool getValue() const;
+
+            void expressionNode() override {}
+
+            string TokenLiteral() override;
+
+            string String() override;
+
+        };
+
+        /**
+         * if 表达式
+         */
+        class IfExpression : virtual public Expression {
+        private:
+            token::Token Token; // if 词法单元
+            Expression* Condition; // 条件
+            BlockStatement* Consequence; // 如果为真执行的结果
+            BlockStatement* Alternative; // 如果为假，执行的雨具
+
+        public:
+            /**
+             * 构造函数，传入 token, 其余默认为空指针
+             * @param token
+             */
+            explicit IfExpression(token::Token token);
+
+            /**
+             * 从外部获取 Condition
+             * @return
+             */
+            __attribute__((unused)) Expression* getCondition();
+
+            __attribute__((unused)) BlockStatement* getConsequence();
+
+            __attribute__((unused)) BlockStatement* getAlternative();
+
+            /**
+             * 从外部设置条件
+             * @param expression Expression* & 引用
+             */
+            __attribute__((unused)) void setCondition(Expression* & condition);
+
+            /**
+             * 从外部设置 consequence
+             * @param consequence
+             */
+            __attribute__((unused)) void setConsequence(BlockStatement* & consequence);
+
+            /**
+             * 从外部设置 分支语句
+             * @param alternative
+             */
+            __attribute__((unused)) void setAlternative(BlockStatement* & alternative);
 
             void expressionNode() override {}
 

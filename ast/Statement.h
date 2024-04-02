@@ -3,6 +3,7 @@
 #ifndef MONKEY_STATEMENT_H
 #define MONKEY_STATEMENT_H
 
+#include <vector>
 #include "../token/Token.h"
 #include "Expression.h"
 
@@ -97,6 +98,40 @@ namespace monkey {
              * @return Expression* 无法从外部修改
              */
             class Expression* getExpression();
+
+            string String() override;
+
+        };
+
+        /**
+         * 语句块
+         * 比如 if 语句的的执行就是条件块
+         * if (a) { a ++; } a++ 就是语句块
+         */
+        class BlockStatement : virtual public Statement {
+        private:
+            token::Token Token; // { 词法单元
+            std::vector<Statement*> Statements; // 语句块的所有语句
+
+
+        public:
+            BlockStatement() = default;
+
+            /**
+             * 构造函数， 传入 token
+             * @param token
+             */
+            __attribute__((unused)) explicit BlockStatement(token::Token token);
+
+            /**
+             * 从外部设置 Statements
+             * @param statements std::vector<Statements*> 的引用
+             */
+            __attribute__((unused)) void setStatements(std::vector<Statement*>& statements);
+
+            void statementNode() override {}
+
+            string TokenLiteral() override;
 
             string String() override;
 

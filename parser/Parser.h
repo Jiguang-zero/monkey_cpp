@@ -150,11 +150,29 @@ namespace monkey {
               ast::Expression* parseBoolean();
 
               /**
+               * 解析 组 表达式 ()括号为一组
+               * @return
+               */
+              ast::Expression* parseGroupedExpression();
+
+              /**
+               * 解析 if 表达式
+               * @return
+               */
+              ast::Expression* parseIfExpression();
+
+              /**
                * 解析 infix 表达式
                * @param left  Expression*
                * @return ast::Expression*
                */
               ast::Expression* parseInfixExpression(ast::Expression* left);
+
+              /**
+               * 解析 语句块
+               * @return ast::BlockStatement
+               */
+              ast::BlockStatement* parseBlockStatement();
 
 
             /**

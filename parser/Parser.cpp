@@ -18,6 +18,7 @@ namespace monkey {
             p->registerPrefix(token::MINUS, &Parser::parsePrefixExpression);
             p->registerPrefix(token::TOKEN_TRUE, &Parser::parseBoolean);
             p->registerPrefix(token::TOKEN_FALSE, &Parser::parseBoolean);
+            p->registerPrefix(token::LPAREN, &Parser::parseGroupedExpression);
 
             // 注册中缀函数
             p->registerInfix(token::PLUS, &Parser::parseInfixExpression);
@@ -281,6 +282,103 @@ namespace monkey {
             expression = boolExpression;
 
             return expression;
+        }
+
+        ast::Expression *Parser::parseGroupedExpression() {
+            // 遇到括号选择下一个词法单元
+            nextToken();
+
+            auto * expression = new ast::Expression();
+
+            expression = parseExpression(LOWEST);
+
+            if (!expectPeek(token::RPAREN)) {
+                return nullptr;
+            }
+
+
+            return expression;
+        }
+
+        ast::Expression *Parser::parseIfExpression() {
+            auto * expression = new ast::Expression();
+
+            auto * ifExpression = new ast::IfExpression(curToken);
+
+            if (!expectPeek(token::LPAREN)) {
+                delete ifExpression;
+                delete expression;
+                expression = nullptr;
+                ifExpression = nullptr;
+                return nullptr;
+            }
+
+            nextToken();
+
+            auto condition = new ast::Expression();
+            condition = parseExpression(LOWEST);
+
+            ifExpression->setCondition(condition);
+
+            if (!expectPeek(token::LBRACE)) {
+                delete condition;
+                delete ifExpression;
+                delete expression;
+                condition = nullptr;
+                ifExpression = nullptr;
+                condition = nullptr;
+                return nullptr;
+            }
+
+            auto * consequence = new ast::BlockStatement();
+            consequence = parseBlockStatement();
+
+            ifExpression->setConsequence(consequence);
+
+            if (peekTokenIs(token::ELSE)) {
+                nextToken();
+
+                if (!expectPeek(token::LBRACE)) {
+                    delete consequence;
+                    delete condition;
+                    delete ifExpression;
+                    delete expression;
+                    consequence = nullptr;
+                    condition = nullptr;
+                    ifExpression = nullptr;
+                    expression = nullptr;
+
+                    return nullptr;
+                }
+
+                auto * alternative = new ast::BlockStatement();
+                alternative = parseBlockStatement();
+                ifExpression->setAlternative(alternative);
+            }
+
+            expression = ifExpression;
+
+            return expression;
+        }
+
+        ast::BlockStatement *Parser::parseBlockStatement() {
+            auto block = new ast::BlockStatement(curToken);
+            vector<ast::Statement*> statements;
+
+            // 获取 { 下一个词法单元
+            nextToken();
+
+            while (!curTokenIs(token::RBRACE) && !curTokenIs(token::TOKEN_EOF)) {
+                auto * stmt = new ast::Statement;
+                if (stmt != nullptr) {
+                    statements.emplace_back(stmt);
+                }
+                nextToken();
+            }
+
+            block->setStatements(statements);
+
+            return block;
         }
     }
 

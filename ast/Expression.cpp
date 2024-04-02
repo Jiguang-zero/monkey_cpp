@@ -1,4 +1,6 @@
+#include "Statement.h"
 #include "Expression.h"
+
 
 #include <utility>
 
@@ -132,6 +134,51 @@ namespace monkey {
         bool Boolean::getValue() const {
             return Value;
         }
+
+        string IfExpression::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        string IfExpression::String() {
+            std::ostringstream oss;
+
+            oss << "if";
+            oss << Condition->String();
+            oss << " ";
+            oss << Consequence->String();
+
+            if (Alternative != nullptr) {
+                oss << "else ";
+                oss << Alternative->String();
+            }
+
+            return oss.str();
+        }
+
+        IfExpression::IfExpression(token::Token token) {
+            Token = std::move(token);
+            Consequence = nullptr;
+            Condition = nullptr;
+            Alternative = nullptr;
+        }
+
+        __attribute__((unused)) void IfExpression::setCondition(Expression *&condition) {
+            Condition = condition;
+        }
+
+        __attribute__((unused)) void IfExpression::setConsequence(BlockStatement *&consequence) {
+            Consequence = consequence;
+        }
+
+        __attribute__((unused)) void IfExpression::setAlternative(BlockStatement *&alternative) {
+            Alternative = alternative;
+        }
+
+        __attribute__((unused)) Expression *IfExpression::getCondition() { return Condition; }
+
+        __attribute__((unused)) BlockStatement *IfExpression::getConsequence() { return Consequence; }
+
+        __attribute__((unused)) BlockStatement *IfExpression::getAlternative() { return Alternative; }
     }
 
 }
