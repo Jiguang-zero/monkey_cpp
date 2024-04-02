@@ -9,9 +9,9 @@
 #include "../token/Token.h"
 //#include "Statement.h"
 
-namespace monkey {
 
-    namespace ast {
+
+    namespace monkey::ast {
         class BlockStatement;
 
         /**
@@ -72,7 +72,7 @@ namespace monkey {
              * 从外部获取 Value
              * @return long long, 不能从外部修改
              */
-            __attribute__((unused)) long long getValue() const;
+            [[nodiscard]] __attribute__((unused)) long long getValue() const;
 
             /**
              * 从外部设置 value
@@ -133,7 +133,7 @@ namespace monkey {
              * 从外部获取运算符，不可从外部修改
              * @return
              */
-            __attribute__((unused)) string getOperator() const;
+            [[nodiscard]] __attribute__((unused)) string getOperator() const;
 
             /**
              * 获取 前缀表达式的 String() 函数
@@ -154,10 +154,22 @@ namespace monkey {
             Expression* Right;
 
         public:
+            /**
+             * 获取 Left
+             * @return Expression*
+             */
             __attribute__((unused)) Expression* getLeft();
 
+            /**
+             * 获取 Right
+             * @return Expression*
+             */
             __attribute__((unused)) Expression* getRight();
 
+            /**
+             * 获取运算符
+             * @return string
+             */
             __attribute__((unused)) string getOperator();
 
             /**
@@ -194,7 +206,7 @@ namespace monkey {
         public:
             Boolean(token::Token token, bool value);
 
-            __attribute__((unused)) bool getValue() const;
+            [[nodiscard]] __attribute__((unused)) bool getValue() const;
 
             void expressionNode() override {}
 
@@ -225,11 +237,11 @@ namespace monkey {
              * 从外部获取 Condition
              * @return
              */
-            __attribute__((unused)) Expression* getCondition();
+            __attribute__((unused)) Expression *& getCondition();
 
-            __attribute__((unused)) BlockStatement* getConsequence();
+            __attribute__((unused)) BlockStatement *& getConsequence();
 
-            __attribute__((unused)) BlockStatement* getAlternative();
+            __attribute__((unused)) BlockStatement *& getAlternative();
 
             /**
              * 从外部设置条件
@@ -259,7 +271,7 @@ namespace monkey {
 
     } // ast
 
-} // monkey
+// monkey
 
 
 #endif //MONKEY_EXPRESSION_H

@@ -174,11 +174,11 @@ namespace monkey {
             Alternative = alternative;
         }
 
-        __attribute__((unused)) Expression *IfExpression::getCondition() { return Condition; }
+        __attribute__((unused)) Expression *& IfExpression::getCondition() { return Condition; }
 
-        __attribute__((unused)) BlockStatement *IfExpression::getConsequence() { return Consequence; }
+        __attribute__((unused)) BlockStatement *& IfExpression::getConsequence() { return Consequence; }
 
-        __attribute__((unused)) BlockStatement *IfExpression::getAlternative() { return Alternative; }
+        __attribute__((unused)) BlockStatement *& IfExpression::getAlternative() { return Alternative; }
     }
 
 }

@@ -2,8 +2,8 @@
 #include <iostream>
 #include <cstdlib>
 
-namespace monkey {
-    namespace parser {
+
+    namespace monkey::parser {
         Parser::Parser(lexer::Lexer* _l) {
             l = _l;
         }
@@ -19,6 +19,7 @@ namespace monkey {
             p->registerPrefix(token::TOKEN_TRUE, &Parser::parseBoolean);
             p->registerPrefix(token::TOKEN_FALSE, &Parser::parseBoolean);
             p->registerPrefix(token::LPAREN, &Parser::parseGroupedExpression);
+            p->registerPrefix(token::IF, &Parser::parseIfExpression);
 
             // 注册中缀函数
             p->registerInfix(token::PLUS, &Parser::parseInfixExpression);
@@ -308,31 +309,34 @@ namespace monkey {
             if (!expectPeek(token::LPAREN)) {
                 delete ifExpression;
                 delete expression;
-                expression = nullptr;
-                ifExpression = nullptr;
+
                 return nullptr;
             }
 
             nextToken();
-
             auto condition = new ast::Expression();
             condition = parseExpression(LOWEST);
-
             ifExpression->setCondition(condition);
+
+
+            if (!expectPeek(token::RPAREN)) {
+                delete condition;
+                condition = nullptr;
+                delete ifExpression;
+                delete expression;
+                return nullptr;
+            }
 
             if (!expectPeek(token::LBRACE)) {
                 delete condition;
+                condition = nullptr;
                 delete ifExpression;
                 delete expression;
-                condition = nullptr;
-                ifExpression = nullptr;
-                condition = nullptr;
                 return nullptr;
             }
 
             auto * consequence = new ast::BlockStatement();
             consequence = parseBlockStatement();
-
             ifExpression->setConsequence(consequence);
 
             if (peekTokenIs(token::ELSE)) {
@@ -340,14 +344,11 @@ namespace monkey {
 
                 if (!expectPeek(token::LBRACE)) {
                     delete consequence;
+                    consequence = nullptr;
                     delete condition;
+                    condition = nullptr;
                     delete ifExpression;
                     delete expression;
-                    consequence = nullptr;
-                    condition = nullptr;
-                    ifExpression = nullptr;
-                    expression = nullptr;
-
                     return nullptr;
                 }
 
@@ -356,6 +357,7 @@ namespace monkey {
                 ifExpression->setAlternative(alternative);
             }
 
+
             expression = ifExpression;
 
             return expression;
@@ -363,23 +365,21 @@ namespace monkey {
 
         ast::BlockStatement *Parser::parseBlockStatement() {
             auto block = new ast::BlockStatement(curToken);
-            vector<ast::Statement*> statements;
+            block->setStatements(vector<ast::Statement*>());
 
             // 获取 { 下一个词法单元
             nextToken();
 
             while (!curTokenIs(token::RBRACE) && !curTokenIs(token::TOKEN_EOF)) {
                 auto * stmt = new ast::Statement;
+                stmt = parseStatement();
                 if (stmt != nullptr) {
-                    statements.emplace_back(stmt);
+                    block->getStatements().emplace_back(stmt);
                 }
                 nextToken();
             }
-
-            block->setStatements(statements);
 
             return block;
         }
     }
 
-}

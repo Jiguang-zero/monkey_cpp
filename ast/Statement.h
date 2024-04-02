@@ -7,8 +7,8 @@
 #include "../token/Token.h"
 #include "Expression.h"
 
-namespace monkey {
-    namespace ast {
+
+    namespace monkey::ast {
 
         // Let 语句的实现 
         class LetStatement : virtual public Statement {
@@ -118,6 +118,12 @@ namespace monkey {
             BlockStatement() = default;
 
             /**
+             * 从外部获取 Statements
+             * @return std::vector<Statement*>, 返回引用，从外部修改
+             */
+            [[maybe_unused]] std::vector<Statement*>& getStatements();
+
+            /**
              * 构造函数， 传入 token
              * @param token
              */
@@ -127,7 +133,7 @@ namespace monkey {
              * 从外部设置 Statements
              * @param statements std::vector<Statements*> 的引用
              */
-            __attribute__((unused)) void setStatements(std::vector<Statement*>& statements);
+            __attribute__((unused)) void setStatements(std::vector<Statement*> statements);
 
             void statementNode() override {}
 
@@ -137,7 +143,7 @@ namespace monkey {
 
         };
     }
-}
+
 
 
 #endif

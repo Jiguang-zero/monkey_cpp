@@ -108,8 +108,12 @@ namespace monkey {
             Token = std::move(token);
         }
 
-        __attribute__((unused)) void BlockStatement::setStatements(std::vector<Statement *> &statements) {
-            Statements = statements;
+        __attribute__((unused)) void BlockStatement::setStatements(std::vector<Statement *> statements) {
+            Statements = std::move(statements);
+        }
+
+        [[maybe_unused]] std::vector<Statement *> & BlockStatement::getStatements() {
+            return Statements;
         }
     }
 }

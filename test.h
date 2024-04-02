@@ -38,6 +38,8 @@ void testParser() {
 
     testBooleanExpression();
 
+    testIfElseExpression();
+
     cout << "Test parser END" << endl;
 
     cout << endl;

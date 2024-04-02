@@ -8,6 +8,7 @@
 #include <vector>
 #include "typeinfo"
 #include <tuple>
+#include <variant>
 
 
 using std::vector;
@@ -16,6 +17,8 @@ using std::cout;
 using std::endl;
 using std::cerr;
 using std::get;
+using std::variant;
+using std::holds_alternative;
 
 using namespace monkey;
 
@@ -84,6 +87,107 @@ bool testIntegerLiteral(ast::Expression* expression, long long value) {
 
     return true;
 }
+
+// 测试标识符 辅助函数
+bool testIdentifier(ast::Expression * expression, const string& value) {
+    auto * ident = dynamic_cast<ast::Identifier *>(expression);
+
+    if (!ident) {
+        cout << "testIdentifier() wrong: get ast::Identifier* Failed. " << endl;
+        return false;
+    }
+
+    if (ident->getValue() != value) {
+        cout << "ident.Value not " << value << " but " << ident->getValue() << endl;
+        return false;
+    }
+
+    if (ident->TokenLiteral() != value) {
+        cout << "ident.TokenLiteral not " << value << " but " << ident->TokenLiteral() << endl;
+        return false;
+    }
+
+    return true;
+}
+
+// 判断 布尔值 的表达式字面量是否正确
+bool testBooleanLiteral(ast::Expression* expression, bool value) {
+    auto * bo = dynamic_cast<ast::Boolean *>(expression);
+
+    if (!bo) {
+        cout << "get ast::Boolean Failed. " << endl;
+        return false;
+    }
+
+    if (bo->getValue() != value) {
+        cout << "bo.Value not " << value << " but " << bo->getValue() << endl;
+        return false;
+    }
+
+    // 获取 布尔值的 string
+    auto fn = [&] () -> string {
+        return value ? "true" : "false";
+    };
+
+    if (bo->TokenLiteral() != fn()) {
+        cout << "bo.TokenLiteral() not " << fn() << " but " << bo->TokenLiteral() << endl;
+        return false;
+    }
+
+
+    return true;
+}
+
+bool testLiteralExpression(
+        ast::Expression * exp,
+        std::variant<int, long long, string, bool> expected
+        ) {
+    if (holds_alternative<int>(expected)) {
+        return testIntegerLiteral(exp, static_cast<long long>(get<int>(expected)));
+    }
+    else if (holds_alternative<long long>(expected)) {
+        return testIntegerLiteral(exp, get<long long>(expected));
+    }
+    else if (holds_alternative<string>(expected)) {
+        return testIdentifier(exp, get<string>(expected));
+    }
+    else if (holds_alternative<bool>(expected)) {
+        return testBooleanLiteral(exp, get<bool>(expected));
+    }
+
+    cerr << "type of exp not handled. " << exp->String() << endl;
+    return false;
+}
+
+bool testInfixExpression(
+        ast::Expression * exp,
+        variant<int, long long, string, bool> left,
+        const string& op, // operator
+        variant<int, long long, string, bool> right
+        ) {
+    auto * opExp = dynamic_cast<ast::InfixExpression *>(exp);
+    if (!opExp) {
+        cout << "get infixExpression Failed. " << endl;
+        return false;
+    }
+
+    if (!testLiteralExpression(opExp->getLeft(), std::move(left))) {
+        return false;
+    }
+
+    if (opExp->getOperator() != op) {
+        cout << "exp.Operator not " << op << " but " << opExp->getOperator() << endl;
+        return false;
+    }
+
+    if (!testLiteralExpression(opExp->getRight(), std::move(right))) {
+        return false;
+    }
+
+    return true;
+}
+
+
 
 /************ 测试函数 ****************/
 // 测试 let 语句
@@ -270,17 +374,27 @@ void testIntegerLiteralExpression() {
 void testParsingPrefixExpressions() {
     cout << "Test testParsingPrefixExpressions() START:" << endl;
 
-    typedef tuple<string, string, long long> prefixTests;
+    struct PrefixTest {
+        string input;
+        string op;
+        variant<int, long long, string, bool> value;
 
-    vector<prefixTests> tests = {
+        PrefixTest(string i,
+                   string o,
+                   variant<int, long long, string, bool> v)
+                   : input(std::move(i)), op(std::move(o)), value(std::move(v)) {};
+    };
+
+    vector<PrefixTest> tests = {
             {"!5;", "!", 5},
             {"-632; ", "-", 632},
+            {"!true", "!", true}
     };
 
     bool flag(true);
 
-    for (auto test : tests) {
-        auto * l = lexer::Lexer::New(get<0>(test));
+    for (const auto& test : tests) {
+        auto * l = lexer::Lexer::New(test.input);
         auto * p = parser::Parser::New(l);
 
         auto * program = p->ParseProgram();
@@ -302,12 +416,12 @@ void testParsingPrefixExpressions() {
             cerr << "get ast::PrefixExpression Failed." << endl;
         }
 
-        if (exp->getOperator() != get<1>(test)) {
+        if (exp->getOperator() != test.op) {
             flag = false;
-            cout << "exp.Operator not " << get<1>(test) << " but " << exp->getOperator() << endl;
+            cout << "exp.Operator not " << test.op << " but " << exp->getOperator() << endl;
         }
 
-        if (!testIntegerLiteral(exp->getRightExpression(), get<2>(test))) {
+        if (!testLiteralExpression(exp->getRightExpression(), test.value)) {
             flag = false;
         }
 
@@ -327,20 +441,20 @@ void testParsingInfixExpressions() {
 
     struct infixTest {
         string input;
-        long long leftValue;
+        variant<int, long long, string, bool> leftValue;
         string op; // operator
-        long long rightValue;
+        variant<int, long long, string, bool> rightValue;
 
         infixTest(
                 string i,
-                long long lV,
+                variant<int, long long, string, bool> lV,
                 string o,
-                long long rV
+                variant<int, long long, string, bool> rV
                 ) {
             input = std::move(i);
-            leftValue = lV;
+            leftValue = std::move(lV);
             op = std::move(o);
-            rightValue = rV;
+            rightValue = std::move(rV);
         }
     };
 
@@ -352,7 +466,8 @@ void testParsingInfixExpressions() {
             infixTest("5 > 5", 5, ">", 5),
             infixTest("5 < 5", 5, "<", 5),
             infixTest("5 == 5", 5, "==", 5),
-            infixTest("5 != 5", 5, "!=", 5)
+            infixTest("5 != 5", 5, "!=", 5),
+            infixTest("true != false", true, "!=", false)
     };
 
     bool flag(true);
@@ -377,26 +492,14 @@ void testParsingInfixExpressions() {
             return;
         }
 
-        auto * exp = dynamic_cast<ast::InfixExpression *>(stmt->getExpression());
-        if (!exp) {
-            cerr << "get ast::InfixExpression Failed." << endl;
-            return;
-        }
-
-        if (!testIntegerLiteral(exp->getLeft(), test.leftValue)) {
-            flag = false;
-        }
-        if (exp->getOperator() != test.op) {
-            cout << "exp.Operator() not " << test.op;
-            cout << " but " << exp->getOperator() << endl;
-            flag = false;
-        }
-        if (!testIntegerLiteral(exp->getRight(), test.rightValue)) {
+        if (!testInfixExpression(stmt->getExpression(),
+                                 test.leftValue,
+                                 test.op,
+                                 test.rightValue)) {
             flag = false;
         }
 
         // 释放空间
-        delete exp;
         delete stmt;
         delete program;
         delete p;
@@ -499,23 +602,7 @@ void testBooleanExpression() {
             return;
         }
 
-        auto * expression = dynamic_cast<ast::Boolean *>(stmt->getExpression());
-        if (!expression) {
-            cerr << "get ast::Boolean Failed." << endl;
-            return;
-        }
-
-        auto fn = [&] () -> string {
-            return test.value ? "true" : "false";
-        };
-
-        if (expression->TokenLiteral() != fn()) {
-            cout << "expression.TokenLiteral not " << fn() << " but " << expression->TokenLiteral() << endl;
-            flag = false;
-        }
-
-        if (expression->getValue() != test.value) {
-            cout << "expression.Value not " << test.value << " but " << expression->getValue() << endl;
+        if (!testBooleanLiteral(stmt->getExpression(), test.value)) {
             flag = false;
         }
     }
@@ -528,10 +615,11 @@ void testIfElseExpression() {
 
     bool flag(true);
 
-    string input = "if (x < y) {x;}";
+    string input = "if (x < y) {x;} else {y;}";
 
     auto * l = lexer::Lexer::New(input);
     auto * p = parser::Parser::New(l);
+
 
     auto * program = p->ParseProgram();
     checkoutParserErrors(p);
@@ -553,7 +641,36 @@ void testIfElseExpression() {
         return;
     }
 
-//    if (!testIntegerLiteral(expression->getCondition(), "x", "<", "y"))/
+    if (!testInfixExpression(expression->getCondition(), "x", "<", "y")) {
+        flag = false;
+    }
 
-    cout << "Test testIfElse Expression() END: " << (flag ? "PASS": "FAIL") << endl;
+    if (auto len = expression->getConsequence()->getStatements().size() != 1) {
+        cout << "consequence does not include 1 statement. got " << len << endl;
+        flag = false;
+    }
+
+    auto * consequence = dynamic_cast<ast::ExpressionStatement*>(
+            expression->getConsequence()->getStatements()[0]
+            );
+    if (!testIdentifier(consequence->getExpression(), "x")) {
+        flag = false;
+    }
+
+    if (expression->getAlternative()) {
+        if (auto len = expression->getAlternative()->getStatements().size() != 1) {
+            cout << "alternative does not include 1 statement. got " << len << endl;
+            flag = false;
+        }
+
+        auto * alternative = dynamic_cast<ast::ExpressionStatement*>(
+                expression->getAlternative()->getStatements()[0]
+                );
+        if (!testIdentifier(alternative->getExpression(), "y")) {
+            flag = false;
+        }
+
+    }
+
+    cout << "Test testIfElseExpression() END: " << (flag ? "PASS": "FAIL") << endl;
 }
