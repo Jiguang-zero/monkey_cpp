@@ -7,10 +7,12 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 
 using std::string;
 using std::istream;
 using std::ostream;
+using std::vector;
 using std::endl;
 
 namespace monkey {
@@ -28,6 +30,14 @@ namespace monkey {
              * @param out ostream&
              */
             static void Start(istream& in, ostream& out);
+
+        private:
+            /**
+             * ¥Ú”°¥ÌŒÛ–≈œ¢
+             * @param out ostream&
+             * @param errors std::vector<string>
+             */
+            static void printParserErrors(ostream& out, const std::vector<string>& errors);
 
         };
 

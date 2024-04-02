@@ -132,9 +132,17 @@
             }
 
 
-            while (!curTokenIs(token::SEMICOLON)) {
+            nextToken();
+
+            auto * value = new ast::Expression();
+            value = parseExpression(LOWEST);
+
+            stmt->setValue(value);
+
+            if (peekTokenIs(token::SEMICOLON)) {
                 nextToken();
             }
+
 
             return stmt;
         }
@@ -144,9 +152,14 @@
 
             nextToken();
 
-            while (!curTokenIs(token::SEMICOLON)) {
+            auto * value = new ast::Expression();
+            value = parseExpression(LOWEST);
+            stmt->setReturnValue(value);
+
+            if (peekTokenIs(token::SEMICOLON)) {
                 nextToken();
             }
+
 
             return stmt;
         }

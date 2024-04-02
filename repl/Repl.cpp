@@ -5,9 +5,11 @@
 #include "Repl.h"
 #include "../lexer/Lexer.h"
 #include "../token/Token.h"
+#include "../parser/Parser.h"
 
 using monkey::lexer::Lexer;
 using monkey::token::Token;
+using monkey::parser::Parser;
 
 namespace monkey {
     namespace repl {
@@ -23,11 +25,25 @@ namespace monkey {
                 }
 
                 Lexer *l = lexer::Lexer::New(line);
+                Parser *p = parser::Parser::New(l);
 
-                for (Token tok = l->NextToken(); tok.getType() != token::TOKEN_EOF; tok = l->NextToken()) {
-                    out << tok.String() << endl;
+                auto * program = p->ParseProgram();
+                if (!p->getErrors().empty()) {
+                    printParserErrors(out, p->getErrors());
                 }
 
+                out << program->String() << endl;
+
+                // 释放空间
+                delete program;
+                delete p;
+                delete l;
+            }
+        }
+
+        void Repl::printParserErrors(ostream &out, const vector<string>& errors) {
+            for (const auto & error : errors) {
+                out << "\t" << error << "\n";
             }
         }
     } // repl
@@ -35,5 +51,6 @@ namespace monkey {
     // 定义变量
     namespace repl {
         const string Repl::PROMPT = ">>";
+
     }
 } // monkey

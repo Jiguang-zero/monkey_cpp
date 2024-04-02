@@ -3,10 +3,11 @@
 //
 
 #include "test.h"
-//#include <windows.h>
-//#include <Lmcons.h>
-//
-//#include "repl/Repl.h"
+
+#include <windows.h>
+#include <Lmcons.h>
+
+#include "repl/Repl.h"
 
 using namespace monkey;
 
@@ -21,16 +22,16 @@ void test() {
 
 int main(int argc, char** argv) {
     // window 环境获取用户
-//    char username[UNLEN+1];
-//    DWORD username_len = UNLEN+1;
-//    GetUserNameA(username, &username_len);
-//
-//    string a;
-//    printf("Hello %s! Feel free to type in commands\n", username);
-//
-//    monkey::repl::Repl::Start(std::cin, std::cout);
+    char username[UNLEN+1];
+    DWORD username_len = UNLEN+1;
+    GetUserNameA(username, &username_len);
 
-    test();
+    string a;
+    printf("Hello %s! Feel free to type in commands\n", username);
+
+    monkey::repl::Repl::Start(std::cin, std::cout);
+
+//    test();
 
     return 0;
 }

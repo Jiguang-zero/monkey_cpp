@@ -2,8 +2,8 @@
 
 #include <utility>
 
-namespace monkey {
-    namespace ast {
+
+    namespace monkey::ast {
         string LetStatement::TokenLiteral() {
             return Token.getLiteral();
         }
@@ -42,6 +42,14 @@ namespace monkey {
             Value = value;
         }
 
+        [[maybe_unused]] Expression *LetStatement::getValue() {
+            return Value;
+        }
+
+        [[maybe_unused]] void LetStatement::setValue(Expression *&value) {
+            Value = value;
+        }
+
         string ReturnStatement::TokenLiteral() {
             return Token.getLiteral();
         }
@@ -65,6 +73,14 @@ namespace monkey {
             return oss.str();
         }
 
+        [[maybe_unused]] void ReturnStatement::setReturnValue(Expression *&value) {
+            ReturnValue = value;
+        }
+
+        [[maybe_unused]] Expression *ReturnStatement::getReturnValue() {
+            return ReturnValue;
+        }
+
         string ExpressionStatement::TokenLiteral() {
             return Token.getLiteral();
         }
@@ -86,7 +102,7 @@ namespace monkey {
             Expression = expression;
         }
 
-        class Expression *ExpressionStatement::getExpression() {
+        [[maybe_unused]] class Expression *ExpressionStatement::getExpression() {
             return Expression;
         }
 
@@ -116,4 +132,3 @@ namespace monkey {
             return Statements;
         }
     }
-}

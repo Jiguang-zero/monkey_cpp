@@ -46,9 +46,20 @@
              */
             __attribute__((unused)) Identifier* getName();
 
+            /**
+             * 获取 Let 语句的 Value 无法从外部修改
+             * @return Expression*
+             */
+           __attribute__((unused)) Expression* getValue();
+
             // let 语句 TokenLiteral 的实现
             string TokenLiteral() override;
 
+            /**
+             * 从外部设置 Let 语句的 Value
+             * @param value Expression* &
+             */
+            [[maybe_unused]] void setValue(Expression*& value);
 
             // 返回 Let 语句的 String() 函数
             __attribute__((unused)) string String() override;
@@ -71,6 +82,17 @@
             // 返回 ReturnStatement() 的String
             string String() override;
 
+            /**
+             * 从外部设置 return 语句 的 ReturnValue
+             * @param value Expression*
+             */
+            [[maybe_unused]] void setReturnValue(Expression* & value);
+
+            /**
+             * 从外部获取 return 语句的 return value
+             * @return Expression*
+             */
+            [[maybe_unused]] Expression* getReturnValue();
 
         };
 
@@ -97,7 +119,7 @@
              * 获取 表达式 Expression 的 Expression
              * @return Expression* 无法从外部修改
              */
-            class Expression* getExpression();
+            [[maybe_unused]] class Expression* getExpression();
 
             string String() override;
 

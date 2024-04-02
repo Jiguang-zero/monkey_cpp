@@ -192,47 +192,51 @@ bool testInfixExpression(
 /************ ≤‚ ‘∫Ø ˝ ****************/
 // ≤‚ ‘ let ”Ôæ‰
 void testLetStatements() {
-    string input =
-            "let x = 5 ;\n"
-            "let foo_bar = 832343;\n";
-
-    cout << "Test testLetStatements() Start: " << endl;
-
-    auto l = lexer::Lexer::New(input);
-    auto p = parser::Parser::New(l);
-
-    auto *program = p->ParseProgram();
-
-    checkoutParserErrors(p);
-
-    bool flag = true;
-
-    if (program == nullptr) {
-        cerr << "ParseProgram() returned nullptr" << endl;
-        return;
-    }
-
-    if (program->getStatements().size() != 2) {
-        cout << "program.Statements does not contain 2 statements. got=" << program->getStatements().size() << endl;
-        flag = false;
-    }
-
-    vector<string> identifiers = {
-            "x",
-            "foo_bar"
+    struct TestType {
+        string input;
+        string expectedIdentifier;
+        std::variant<int, long long, string, bool> expectedValue;
     };
 
-    int i = 0;
-    for (const auto& identifier : identifiers) {
-        auto* stmt = program->getStatements()[i];
-        if (!testLetStatement(*stmt, identifier)) {
+    vector<TestType> tests = {
+            {"let x = 5", "x", 5},
+            {"let y = true", "y", true},
+            {"let x = y", "x", "y"}
+    };
+
+    cout << "Test testLetStatements() Start: " << endl;
+    bool flag = true;
+
+    for (const auto & test : tests) {
+        auto l = lexer::Lexer::New(test.input);
+        auto p = parser::Parser::New(l);
+
+        auto *program = p->ParseProgram();
+
+        checkoutParserErrors(p);
+
+
+        if (program == nullptr) {
+            cerr << "ParseProgram() returned nullptr" << endl;
+            return;
+        }
+
+        if (program->getStatements().size() != 1) {
+            cout << "program.Statements does not contain 1 statements. got=" << program->getStatements().size() << endl;
             flag = false;
         }
 
-        i++;
+        auto* stmt = program->getStatements()[0];
+        if (!testLetStatement(*stmt, test.expectedIdentifier)) {
+            flag = false;
+        }
+
+        auto * val = dynamic_cast<ast::LetStatement*>(stmt)->getValue();
+
+        if (!testLiteralExpression(val, test.expectedValue)) {
+            flag = false;
+        }
     }
-
-
 
     cout << "Test testLetStatements() END: " << (flag ? "PASS" : "FAIL") << endl;
 
@@ -240,38 +244,51 @@ void testLetStatements() {
 
 // ≤‚ ‘ return ”Ôæ‰
 void testReturnStatements() {
-    string input = "return 5; \n"
-                   "return = a; \n"
-                   "return 324 232;";
+    struct TestType {
+        string input;
+        std::variant<int, long long, string, bool> expectedValue;
+    };
 
     cout << "Test testReturnStatements() Start: " << endl;
-
-    auto l = lexer::Lexer::New(input);
-    auto p = parser::Parser::New(l);
-
-    auto *program = p->ParseProgram();
-    checkoutParserErrors(p);
+    vector<TestType> tests = {
+            {"return 5;", 5},
+            {"return true", true},
+            {"return a;", "a"}
+    };
 
     bool flag = true;
 
-    if (program == nullptr) {
-        cerr << "ParseProgram() returned nullptr" << endl;
-        return;
-    }
+    for (const auto & test : tests) {
+        auto l = lexer::Lexer::New(test.input);
+        auto p = parser::Parser::New(l);
 
-    if (program->getStatements().size() != 3) {
-        cout << "program.Statements does not contain 3 statements. got=" << program->getStatements().size() << endl;
-        flag = false;
-    }
+        auto *program = p->ParseProgram();
+        checkoutParserErrors(p);
 
-    for (const auto& stmt : program->getStatements()) {
-        auto* returnStmt = dynamic_cast<ast::ReturnStatement*>(stmt);
-        if (!returnStmt) {
-            cout << "s not *ast::ReturnStatement, but " << typeid(*stmt).name() << endl;
+        if (program == nullptr) {
+            cerr << "ParseProgram() returned nullptr" << endl;
+            return;
+        }
+
+        if (program->getStatements().size() != 1) {
+            cout << "program.Statements does not contain 1 statements. got=" << program->getStatements().size() << endl;
             flag = false;
         }
+
+        auto* returnStmt = dynamic_cast<ast::ReturnStatement*>(program->getStatements()[0]);
+        if (!returnStmt) {
+            cerr << "s not *ast::ReturnStatement, but " << typeid(program->getStatements()[0]).name() << endl;
+            return;
+        }
+
+
         if (returnStmt->TokenLiteral() != "return") {
             cout << "returnStmt.TokenLiteral not 'return' but " << returnStmt->TokenLiteral() << endl;
+            flag = false;
+        }
+
+        if (!testLiteralExpression(returnStmt->getReturnValue(), test.expectedValue)) {
+            flag = false;
         }
     }
 
