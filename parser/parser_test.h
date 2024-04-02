@@ -537,7 +537,8 @@ void testOperatorPrecedenceParsing() {
             TestType("3 > 5 == false", "((3 > 5) == false)"),
             TestType("3 < 5 == true", "((3 < 5) == true)"),
             TestType("!(true == true)", "(!(true == true))"),
-            TestType("1 + 3 * (3 / 9) - (3 + 3)", "((1 + (3 * (3 / 9))) - (3 + 3))")
+            TestType("1 + 3 * (3 / 9) - (3 + 3)", "((1 + (3 * (3 / 9))) - (3 + 3))"),
+            TestType("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))")
     };
 
     for (const auto& test : tests) {
@@ -673,4 +674,175 @@ void testIfElseExpression() {
     }
 
     cout << "Test testIfElseExpression() END: " << (flag ? "PASS": "FAIL") << endl;
+}
+
+void testFunctionLiteralParsing() {
+    cout << "Test testFunctionLiteralParsing() START:" << endl;
+
+    string input = "fn(x, y) { x + y; }";
+
+    bool flag(true);
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * function = dynamic_cast<ast::FunctionLiteral*>(stmt->getExpression());
+    if (!function) {
+        cerr << "get ast::FunctionLiteral Failed." << endl;
+        return;
+    }
+
+    if (function->getParameters().size() != 2) {
+        cout << "function.Parameters not 2 but " << function->getParameters().size() << endl;
+        flag = false;
+    }
+
+    if (!testIdentifier(function->getParameters()[0], "x")) flag = false;
+    if (!testIdentifier(function->getParameters()[1], "y")) flag = false;
+
+    if (auto len = function->getBody()->getStatements().size() != 1) {
+        cout << "function.body.statements does not include 1 statement. got " << len << endl;
+        flag = false;
+    }
+
+    auto bodyStmt = dynamic_cast<ast::ExpressionStatement*>(function->getBody()->getStatements()[0]);
+    if (!bodyStmt) {
+        cerr << "get ast::ExpressionStatements Failed." << endl;
+        return;
+    }
+
+    if (!testInfixExpression(bodyStmt->getExpression(), "x", "+", "y")) flag = false;
+
+    cout << "Test testFunctionLiteralParsing() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testFunctionParameters() {
+    cout << "Test testFunctionParameters() START:" << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        vector<string> expectedParams;
+    };
+
+    vector<TestType> tests = {
+            {"fn() {};", {}},
+            {"fn(x) {};", {"x"}},
+            {"fn(x, y, z) {};", {"x", "y", "z"}}
+    };
+
+    for (const auto& test : tests) {
+        auto * l = lexer::Lexer::New(test.input);
+        auto * p = parser::Parser::New(l);
+
+
+        auto * program = p->ParseProgram();
+        checkoutParserErrors(p);
+
+        if (program->getStatements().size() != 1) {
+            cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+            flag = false;
+        }
+
+        auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+        if (!stmt) {
+            cerr << "get ast::ExpressionStatement Failed." << endl;
+            return;
+        }
+
+        auto * function = dynamic_cast<ast::FunctionLiteral*>(stmt->getExpression());
+        if (!function) {
+            cerr << "get ast::FunctionLiteral Failed." << endl;
+            return;
+        }
+
+        if (auto actual = function->getParameters().size() != test.expectedParams.size()) {
+            cout << "the number of parameters is wrong. want " << test.expectedParams.size();
+            cout << " but get " << actual << endl;
+            return;
+        }
+
+        int i(0);
+        for (const auto& ident : test.expectedParams) {
+            if (!testLiteralExpression(function->getParameters()[i], ident)) {
+                flag = false;
+            }
+            i ++;
+        }
+
+        delete function;
+        delete stmt;
+        delete program;
+        delete p;
+        delete l;
+
+    }
+
+    cout << "Test testFunctionParameters() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testCallExpressionParsing() {
+    cout << "Test testCallExpressionParsing() START:" << endl;
+
+    bool flag(true);
+
+    string input = "add(1, 2 * 3, 4 + 5);";
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * expression = dynamic_cast<ast::CallExpression*>(stmt->getExpression());
+    if (!expression) {
+        cerr << "get ast::CallExpression Failed." << endl;
+        return;
+    }
+
+    if (!testIdentifier(expression->getFunction(), "add")) {
+        flag = false;
+    }
+
+    if (auto len = expression->getArguments().size() != 3) {
+        cout << "expression.Arguments' size not 3 but " << len << endl;
+        flag = false;
+    }
+
+    if (!testLiteralExpression(expression->getArguments()[0], 1) ||
+        !testInfixExpression(expression->getArguments()[1], 2, "*", 3) ||
+        !testInfixExpression(expression->getArguments()[2], 4, "+", 5)) {
+        flag = false;
+    }
+
+
+    cout << "Test testCallExpressionParsing() END: " << (flag ? "PASS" : "FAIL") << endl;
 }

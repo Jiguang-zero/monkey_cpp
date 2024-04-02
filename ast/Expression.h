@@ -269,6 +269,108 @@
 
         };
 
+        /**
+         * 函数 表达式的定义
+         * 比如 fn(x, y) {x + y}
+         */
+        class FunctionLiteral : virtual public Expression {
+        private:
+            token::Token Token; // 函数词法单元 fn
+            std::vector<Identifier*> Parameters;
+            BlockStatement* Body;
+
+        public:
+            explicit FunctionLiteral(token::Token token);
+
+            /**
+             * 从外部设置 body
+             * @param body BlockStatements* & , 引用，避免了拷贝问题
+             */
+            void setBody(BlockStatement* & body);
+
+            void expressionNode() override {}
+
+            string TokenLiteral() override;
+
+            string String() override;
+
+            /**
+             * 从外部获取参数
+             * @return std::vector<Identifier*>
+             */
+            std::vector<Identifier*> getParameters();
+
+            /**
+             * 从外部获取 body
+             * @return BlockStatement*
+             */
+            BlockStatement* getBody();
+
+            /**
+             * 从外部设置 参数
+             * @param parameters std::vector<Identifier*> 的引用，可以不使用引用
+             */
+            void setParameters(std::vector<Identifier*>& parameters);
+
+        };
+
+        /**
+         * 函数表达式语句
+         * 与FunctionLiteral 不同， Call 表达式是函数的调用
+         */
+        class CallExpression : virtual public Expression {
+        private:
+            token::Token Token; // ( 词法单元
+            Expression* Function; // 函数的字面量
+            std::vector<Expression*> Arguments; // 函数的参数调用
+
+
+        public:
+            /**
+             * 构造函数
+             * @param token
+             */
+            explicit CallExpression(token::Token token);
+
+            /**
+             * 构造函数
+             * @param token 词法单元 (
+             * @param function Expression* & 引用避免拷贝问题
+             */
+            CallExpression(token::Token token, Expression *&function);
+
+            /**
+             * 从外部获取 Function
+             * @return  Expression*
+             */
+            [[maybe_unused]] Expression* getFunction();
+
+            /**
+             * 从外部设置 Function
+             * @param function Expression*&
+             */
+            [[maybe_unused]] void setFunction(Expression*& function);
+
+            /**
+             * 从外部设置参数
+             * @param arguments std::vector<Expression*>&
+             */
+            void setArguments(std::vector<Expression*> & arguments);
+
+            /**
+             * 从外部获取参数，不可从外部修改
+             * @return std::vector<Expression*>
+             */
+            std::vector<Expression*> getArguments();
+
+            void expressionNode() override {}
+
+            string TokenLiteral() override;
+
+            string String() override;
+
+        };
+
     } // ast
 
 // monkey

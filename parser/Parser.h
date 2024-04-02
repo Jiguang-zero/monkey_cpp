@@ -162,11 +162,24 @@ namespace monkey {
               ast::Expression* parseIfExpression();
 
               /**
+               * 解析 函数表达式
+               * @return ast::Expression*
+               */
+              ast::Expression* parseFunctionLiteral();
+
+              /**
                * 解析 infix 表达式
                * @param left  Expression*
                * @return ast::Expression*
                */
               ast::Expression* parseInfixExpression(ast::Expression* left);
+
+              /**
+               * 解析 函数调用 表达式
+               * @param function ast::Expression* 表示这函数字面量的表达式
+               * @return ast::Expression*
+               */
+              ast::Expression* parseCallExpression(ast::Expression* function);
 
               /**
                * 解析 语句块
@@ -221,7 +234,17 @@ namespace monkey {
                 infixParseFns[tokenType] = fn;
             }
 
+            /**
+             * 解析获取函数表达式的所有参数
+             * @return vector<ast::Identifier*>
+             */
+            vector<ast::Identifier*> parseFunctionParameters();
 
+            /**
+             * 解析获取调用函数表达式的所有参数
+             * @return vector<ast::Expression*>
+             */
+            vector<ast::Expression*> parseCallArguments();
 
         public:
             /**

@@ -1,12 +1,12 @@
 #include "Statement.h"
 #include "Expression.h"
 
-
+#include <numeric>
 #include <utility>
 
-namespace monkey {
+
     
-    namespace ast {
+    namespace monkey::ast {
         string Identifier::TokenLiteral() {
             return Token.getLiteral();
         }
@@ -179,6 +179,115 @@ namespace monkey {
         __attribute__((unused)) BlockStatement *& IfExpression::getConsequence() { return Consequence; }
 
         __attribute__((unused)) BlockStatement *& IfExpression::getAlternative() { return Alternative; }
+
+        string FunctionLiteral::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        string FunctionLiteral::String() {
+            std::ostringstream oss;
+
+            std::vector<string> params;
+
+            params.reserve(Parameters.size());
+
+            for (const auto &p: Parameters) {
+                params.push_back(p->String());
+            }
+
+
+            string paramsString = std::accumulate(
+                    params.begin(),
+                    params.end(),
+                    std::string(),
+                    [](const string& a, const string& b) -> string {
+                        return a + (a.length() > 0 ? ", " : "") + b;
+                    }
+                    );
+
+            oss << TokenLiteral();
+            oss << "(";
+            oss << paramsString;
+            oss << ")";
+            oss << Body->String();
+
+
+            return oss.str();
+        }
+
+        FunctionLiteral::FunctionLiteral(token::Token token) {
+            Token = std::move(token);
+            Body = nullptr;
+        }
+
+        void FunctionLiteral::setParameters(std::vector<Identifier *> &parameters) {
+            Parameters = parameters;
+        }
+
+        void FunctionLiteral::setBody(BlockStatement *&body) {
+            Body = body;
+        }
+
+        std::vector<Identifier *> FunctionLiteral::getParameters() {
+            return Parameters;
+        }
+
+        BlockStatement *FunctionLiteral::getBody() {
+            return Body;
+        }
+
+        string CallExpression::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        string CallExpression::String() {
+            std::ostringstream oss;
+
+            std::vector<string> args;
+            args.reserve(Arguments.size());
+
+            for (const auto & argument : Arguments) {
+                args.emplace_back(argument->String());
+            }
+            oss << Function->String();
+            oss << "(";
+            oss << std::accumulate(
+                    args.begin(),
+                    args.end(),
+                    string(),
+                    [] (const string& a, const string& b) -> string {
+                        return a + (a.length() > 0 ? ", " : "") + b;
+                    }
+                    );
+            oss << ")";
+
+            return oss.str();
+        }
+
+        CallExpression::CallExpression(token::Token token) {
+            Token = std::move(token);
+            Function = nullptr;
+        }
+
+        [[maybe_unused]] Expression *CallExpression::getFunction() {
+            return Function;
+        }
+
+        [[maybe_unused]] void CallExpression::setFunction(Expression *&function) {
+            Function = function;
+        }
+
+        void CallExpression::setArguments(std::vector<Expression *> &arguments) {
+            Arguments = arguments;
+        }
+
+        std::vector<Expression *> CallExpression::getArguments() {
+            return Arguments;
+        }
+
+        CallExpression::CallExpression(token::Token token, Expression *&function) {
+            Token = std::move(token);
+            Function = function;
+        }
     }
 
-}

@@ -40,6 +40,12 @@ void testParser() {
 
     testIfElseExpression();
 
+    testFunctionLiteralParsing();
+
+    testFunctionParameters();
+
+    testCallExpressionParsing();
+
     cout << "Test parser END" << endl;
 
     cout << endl;

@@ -8,7 +8,7 @@
             l = _l;
         }
 
-        Parser* Parser::New(lexer::Lexer* l) {
+            Parser* Parser::New(lexer::Lexer* l) {
             auto* p = new Parser(l);
 
             // 注册前缀函数
@@ -20,6 +20,7 @@
             p->registerPrefix(token::TOKEN_FALSE, &Parser::parseBoolean);
             p->registerPrefix(token::LPAREN, &Parser::parseGroupedExpression);
             p->registerPrefix(token::IF, &Parser::parseIfExpression);
+            p->registerPrefix(token::FUNCTION, &Parser::parseFunctionLiteral);
 
             // 注册中缀函数
             p->registerInfix(token::PLUS, &Parser::parseInfixExpression);
@@ -30,6 +31,8 @@
             p->registerInfix(token::NOT_EQ, &Parser::parseInfixExpression);
             p->registerInfix(token::LT, &Parser::parseInfixExpression);
             p->registerInfix(token::GT, &Parser::parseInfixExpression);
+            p->registerInfix(token::LPAREN, &Parser::parseCallExpression);
+
 
             // 设置 curToken 与 peekToken
             p->nextToken();
@@ -272,6 +275,9 @@
             if (type == token::SLASH || type == token::ASTERISK) {
                 return PRODUCT;
             }
+            if (type == token::LPAREN) {
+                return CALL;
+            }
             return LOWEST;
         }
 
@@ -380,6 +386,131 @@
             }
 
             return block;
+        }
+
+        ast::Expression *Parser::parseFunctionLiteral() {
+            auto * expression = new ast::Expression();
+
+            auto * functionLiteral = new ast::FunctionLiteral(curToken);
+
+            if (!expectPeek(token::LPAREN)) {
+                delete functionLiteral;
+                delete expression;
+                return nullptr;
+            }
+
+            auto parameters = parseFunctionParameters();
+            functionLiteral->setParameters(parameters);
+
+            if (!expectPeek(token::LBRACE)) {
+                // 释放局部变量 parameters 存放的指针
+                for (const auto & i : parameters) {
+                    delete i;
+                }
+
+                delete functionLiteral;
+                delete expression;
+
+                return nullptr;
+            }
+
+            auto * body = new ast::BlockStatement();
+            body = parseBlockStatement();
+            functionLiteral->setBody(body);
+
+            expression = functionLiteral;
+
+            return expression;
+        }
+
+        vector<ast::Identifier *> Parser::parseFunctionParameters() {
+            vector<ast::Identifier*> identifiers;
+
+            if (peekTokenIs(token::RPAREN)) {
+                // 跳到右括号词法单元
+                nextToken();
+                return identifiers;
+            }
+
+            // 跳过有括号词法单元
+            nextToken();
+
+            identifiers.emplace_back(new ast::Identifier(curToken, curToken.getLiteral()));
+
+            while (peekTokenIs(token::COMMA)) {
+                // 调到下一个参数
+                nextToken();
+                nextToken();
+
+                //TODO: 处理参数个数与逗号个数不匹配的问题
+
+                identifiers.emplace_back(new ast::Identifier(curToken, curToken.getLiteral()));
+            }
+
+            if (!expectPeek(token::RPAREN)) {
+                // 错误， 返回0个参数
+                //TODO: 错误处理
+
+                for (const auto & i : identifiers) {
+                    delete i;
+                }
+
+                return {};
+            }
+
+            return identifiers;
+        }
+
+        ast::Expression* Parser::parseCallExpression(ast::Expression *function) {
+            auto * expression = new ast::Expression();
+
+            auto * callExpression = new ast::CallExpression(curToken, function);
+
+            vector<ast::Expression*> arguments;
+            arguments = parseCallArguments();
+            callExpression->setArguments(arguments);
+
+            expression = callExpression;
+
+            return expression;
+        }
+
+        vector<ast::Expression*> Parser::parseCallArguments() {
+            vector<ast::Expression*> args;
+
+            if (peekTokenIs(token::RPAREN)) {
+                nextToken();
+                return args;
+            }
+
+            nextToken();
+            auto * firstArgument = new ast::Expression();
+            firstArgument = parseExpression(LOWEST);
+            args.emplace_back(firstArgument);
+
+            while (peekTokenIs(token::COMMA)) {
+                nextToken();
+                nextToken();
+
+                //TODO: 错误处理 add(a, b, ) // 这种情况
+
+                auto * argument = new ast::Expression();
+                argument = parseExpression(LOWEST);
+                args.emplace_back(argument);
+            }
+
+            if (!expectPeek(token::RPAREN)) {
+                // 释放空间
+                for (const auto & a : args) {
+                    delete a;
+                }
+                delete firstArgument;
+                firstArgument = nullptr;
+
+                return {};
+            }
+
+            return args;
         }
     }
 
