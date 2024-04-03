@@ -10,8 +10,8 @@
 
 using std::string;
 
-namespace monkey {
-    namespace ast {
+
+    namespace monkey::ast {
         
         /**
          * 通用Node ast节点
@@ -59,6 +59,6 @@ namespace monkey {
         };
 
     } // ast
-} // monkey
+// monkey
 
 #endif //MONKEY_AST_H

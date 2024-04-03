@@ -9,9 +9,8 @@
 
 using std::vector;
 
-namespace monkey
-{
-    namespace ast
+
+    namespace monkey::ast
     {
         class Program : virtual public Node{
             protected:
@@ -46,11 +45,11 @@ namespace monkey
 
         };
         
-    } // namespace ast
+    } // namespace monkey::ast
     
 
 
-} // namespace monkey
+
 
 
 #endif //MONKEY_PROGRAM_H

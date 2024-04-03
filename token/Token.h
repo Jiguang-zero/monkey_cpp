@@ -12,10 +12,10 @@ using std::string;
 using std::map;
 
 
-namespace monkey {
 
 
-    namespace token {
+
+    namespace monkey::token {
         typedef string TokenType;
 
         /**
@@ -120,6 +120,6 @@ namespace monkey {
 
     } // token
 
-} // monkey
+// monkey
 
 #endif //MONKEY_TOKEN_H

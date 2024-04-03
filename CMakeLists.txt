@@ -12,5 +12,7 @@ add_executable(monkey main.cpp
         ast/Statement.cpp
         parser/Parser.cpp
         ast/Expression.cpp
+        object/object.cpp
+        evaluator/Evaluator.cpp
 )
 

@@ -7,6 +7,7 @@
 #include "lexer/lexer_test.h"
 #include "parser/parser_test.h"
 #include "ast/ast_test.h"
+#include "evaluator/evaluator_test.h"
 
 // token ≤‚ ‘
 void testToken() {
@@ -57,6 +58,16 @@ void testAst() {
     testString();
 
     cout << "Test ast END" << endl;
+
+    cout << endl;
+}
+
+void testEvaluator() {
+    cout << "Test evaluator START: " << endl;
+
+    testEvalIntegerExpression();
+
+    cout << "Test evaluator END" << endl;
 
     cout << endl;
 }
