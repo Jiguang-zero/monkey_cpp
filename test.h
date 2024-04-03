@@ -67,6 +67,10 @@ void testEvaluator() {
 
     testEvalIntegerExpression();
 
+    testEvalBooleanExpression();
+
+    testBangOperator();
+
     cout << "Test evaluator END" << endl;
 
     cout << endl;

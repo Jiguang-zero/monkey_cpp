@@ -19,7 +19,7 @@ void testString() {
     bool flag(true);
 
 
-    ast::Identifier* identifier = new ast::Identifier(
+    auto* identifier = new ast::Identifier(
             token::Token(token::IDENT, "anotherVar"),
             "anotherVar");
 

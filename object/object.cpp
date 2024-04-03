@@ -14,7 +14,7 @@ namespace monkey::object {
         return INTEGER_OBJ;
     }
 
-    void Integer::setValue(long long int value) {
+    [[maybe_unused]] void Integer::setValue(long long int value) {
         Value = value;
     }
 
@@ -30,7 +30,7 @@ namespace monkey::object {
         return BOOLEAN_OBJ;
     }
 
-    void Boolean::setValue(bool value) {
+    [[maybe_unused]] void Boolean::setValue(bool value) {
         Value = value;
     }
 

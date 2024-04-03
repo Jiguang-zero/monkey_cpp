@@ -11,8 +11,8 @@
 using std::cout;
 using std::endl;
 
-namespace monkey {
-    namespace lexer {
+
+    namespace monkey::lexer {
         void Lexer::readChar() {
             if (readPosition >= input.length()) {
                 ch = 0;
@@ -179,4 +179,4 @@ namespace monkey {
             }
         }
     } // monkey
-} // lexer
+// lexer

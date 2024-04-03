@@ -11,9 +11,9 @@
 using std::string;
 
 
-    namespace monkey {
 
-        namespace lexer {
+
+        namespace monkey::lexer {
 
         /**
          * ´Ê·¨½âÎöÆ÷
@@ -105,7 +105,7 @@ using std::string;
         };
 
 
-    } } // lexer
+    } // lexer
 // monkey
 
 #endif //MONKEY_LEXER_H

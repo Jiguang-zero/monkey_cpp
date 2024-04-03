@@ -15,8 +15,8 @@ using std::ostream;
 using std::vector;
 using std::endl;
 
-namespace monkey {
-    namespace repl {
+
+    namespace monkey::repl {
 
         class Repl {
         public:
@@ -42,6 +42,6 @@ namespace monkey {
         };
 
     } // monkey
-} // repl
+// repl
 
 #endif //MONKEY_REPL_H

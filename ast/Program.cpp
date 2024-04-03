@@ -2,8 +2,8 @@
 
 #include <utility>
 
-namespace monkey {
-    namespace ast {
+
+    namespace monkey::ast {
         string Program::TokenLiteral() {
             if (!Statements.empty()) {
                 return Statements[0]->TokenLiteral();
@@ -34,4 +34,3 @@ namespace monkey {
         }
     }
 
-}

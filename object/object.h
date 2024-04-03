@@ -52,7 +52,7 @@ namespace monkey::object {
          */
         explicit Integer(long long value) : Value(value) {};
 
-        [[maybe_unused]] void setValue(long long value);
+        [[maybe_unused]] [[maybe_unused]] void setValue(long long value);
 
         [[maybe_unused]] [[nodiscard]] long long getValue() const;
 
@@ -67,8 +67,11 @@ namespace monkey::object {
         bool Value = true;
 
     public:
+        // 构造函数
+        explicit Boolean(bool value) : Value(value) {};
+
         // 从外部设置 Boolean 的 Value
-        [[maybe_unused]] void setValue(bool value);
+        [[maybe_unused]] [[maybe_unused]] void setValue(bool value);
 
         // 从外部获取 Value, 无法从外部修改
         [[maybe_unused]] [[nodiscard]] bool getValue() const;

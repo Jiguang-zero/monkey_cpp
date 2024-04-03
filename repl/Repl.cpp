@@ -4,8 +4,8 @@
 
 #include "Repl.h"
 #include "../lexer/Lexer.h"
-#include "../token/Token.h"
 #include "../parser/Parser.h"
+#include "../evaluator/Evaluator.h"
 
 using monkey::lexer::Lexer;
 using monkey::token::Token;
@@ -30,9 +30,22 @@ namespace monkey {
                 auto * program = p->ParseProgram();
                 if (!p->getErrors().empty()) {
                     printParserErrors(out, p->getErrors());
+                    // 错误后不必求值
+                    continue;
                 }
 
-                out << program->String() << endl;
+                auto * evaluated = evaluator::Evaluator::Eval(program);
+                if (evaluated) {
+                    out << evaluated->Inspect();
+                    out << endl;
+                }
+
+                if (evaluated != &evaluator::Evaluator::MY_NULL &&
+                    evaluated != &evaluator::Evaluator::TRUE &&
+                    evaluated != &evaluator::Evaluator::FALSE ) {
+                    // 如果是布尔值 或者是空值，不应该删除。。。
+                    delete evaluated;
+                }
 
                 // 释放空间
                 delete program;

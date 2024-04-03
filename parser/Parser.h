@@ -5,8 +5,8 @@
 #include "../lexer/Lexer.h"
 #include "../ast/Program.h"
 
-namespace monkey {
-    namespace parser {
+
+    namespace monkey::parser {
         /**
          * 枚举类型，表示 PRECEDENCE 优先级
          */
@@ -276,6 +276,6 @@ namespace monkey {
         };
 
     }
-}
+
 
 #endif //MONKEY_PARSER_H
