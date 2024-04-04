@@ -50,6 +50,24 @@ namespace monkey::evaluator {
          */
         static object::Object* evalMinusPrefixOperatorExpression(object::Object* right);
 
+        /**
+         * 对中缀表达式进行求值
+         * @param op operator, string +, -, *, /, >, <, ==, !=
+         * @param left object::Object*
+         * @param right object::Object*
+         * @return object::Object*
+         */
+        static object::Object* evalInfixExpression(const string& op, object::Object* left, object::Object* right);
+
+        /**
+         * 对中缀表达式 整数类型 进行求值 left.Type() 和 right.Type() 理论上都得是 Integer_Obj
+         * @param op
+         * @param left
+         * @param right
+         * @return
+         */
+        static object::Object* evalInfixIntegerExpression(const string& op, object::Object* left, object::Object* right);
+
     public:
 
         /**

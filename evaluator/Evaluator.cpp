@@ -33,6 +33,13 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(monkey::ast::Node *no
         return evalPrefixExpression(prefixExpression->getOperator(), right);
     }
 
+    // 中缀表达式
+    else if (auto * infixExpression = dynamic_cast<ast::InfixExpression*>(node)) {
+        auto * left = Eval(infixExpression->getLeft());
+        auto * right = Eval(infixExpression->getRight());
+        return evalInfixExpression(infixExpression->getOperator(), left, right);
+    }
+
     return nullptr;
 }
 
@@ -95,12 +102,71 @@ namespace monkey::evaluator {
         auto * res = new object::Integer(-value);
         return res;
     }
+
+    object::Object *Evaluator::evalInfixExpression(const string &op, object::Object *left, object::Object *right) {
+        if (left->Type() == object::INTEGER_OBJ && right->Type() == object::INTEGER_OBJ) {
+            return evalInfixIntegerExpression(op, left, right);
+        }
+
+        // 不是整数，目前就支持布尔值
+        else if (op == "==") {
+            return nativeBoolToBooleanObject(left == right);
+        }
+        else if (op == "!=") {
+            return nativeBoolToBooleanObject(left != right);
+        }
+
+        else {
+            return (object::Object *) (&MY_NULL);
+        }
+    }
+
+    object::Object *
+    Evaluator::evalInfixIntegerExpression(const string &op, object::Object *left, object::Object *right) {
+        auto leftVal = dynamic_cast<object::Integer*>(left)->getValue();
+        auto rightVal = dynamic_cast<object::Integer*>(right)->getValue();
+
+        if (op == "+") {
+            return new object::Integer(leftVal + rightVal);
+        }
+        else if (op == "-") {
+            return new object::Integer(leftVal - rightVal);
+        }
+        else if (op == "*") {
+            return new object::Integer(leftVal * rightVal);
+        }
+        else if (op == "/") {
+            //TODO: 错误处理，除数不能为 0
+            return new object::Integer(leftVal / rightVal);
+        }
+
+        else if (op == "<") {
+            return nativeBoolToBooleanObject(leftVal < rightVal);
+        }
+        else if (op == ">") {
+            return nativeBoolToBooleanObject(leftVal > rightVal);
+        }
+        else if (op == "==") {
+            return nativeBoolToBooleanObject(leftVal == rightVal);
+        }
+        else if (op == "!=") {
+            return nativeBoolToBooleanObject(leftVal != rightVal);
+        }
+
+
+        else {
+            return (object::Object *) (&MY_NULL);
+        }
+    }
 }
 
 // 定义变量
-namespace monkey::evaluator {
-    const object::Boolean Evaluator::TRUE = object::Boolean(true);
-    const object::Boolean Evaluator::FALSE = object::Boolean(false);
-    const object::Null Evaluator::MY_NULL = object::Null();
 
-}
+const monkey::object::Boolean monkey::evaluator::Evaluator::TRUE = object::Boolean(true);
+const monkey::object::Boolean monkey::evaluator::Evaluator::FALSE = object::Boolean(false);
+const monkey::object::Null monkey::evaluator::Evaluator::MY_NULL = object::Null();
+
+
+
+
+
