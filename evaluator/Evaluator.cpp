@@ -8,7 +8,7 @@
 monkey::object::Object *monkey::evaluator::Evaluator::Eval(monkey::ast::Node *node) { // NOLINT(*-no-recursion)
     // 程序 program
     if (auto * program = dynamic_cast<ast::Program*>(node)) {
-        return evalStatements(program->getStatements());
+        return evalProgram(program->getStatements());
     }
 
     // 表达式语句
@@ -40,14 +40,32 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(monkey::ast::Node *no
         return evalInfixExpression(infixExpression->getOperator(), left, right);
     }
 
+    // 区块语句 (blockStatement)
+    else if (auto * blockStatement = dynamic_cast<ast::BlockStatement*>(node)) {
+        return evalBlockStatement(blockStatement);
+    }
+
+    else if (auto * ifExpression = dynamic_cast<ast::IfExpression*>(node)) {
+        return evalIfExpression(ifExpression);
+    }
+
+    else if (auto * returnStatement = dynamic_cast<ast::ReturnStatement*>(node)) {
+        auto * value = Eval(returnStatement->getReturnValue());
+        return new object::ReturnValue(value);
+    }
+
     return nullptr;
 }
 
-monkey::object::Object *monkey::evaluator::Evaluator::evalStatements(const vector<ast::Statement *>& stmts) { // NOLINT(*-no-recursion)
+monkey::object::Object *monkey::evaluator::Evaluator::evalProgram(const std::vector<ast::Statement *> &stmts) { // NOLINT(*-no-recursion)
     auto * object = new object::Object();
 
     for (const auto & s : stmts) {
         object = Eval(s);
+
+        if (auto * returnValue = dynamic_cast<object::ReturnValue*>(object)) {
+            return returnValue->getValue();
+        }
     }
 
     return object;
@@ -158,6 +176,50 @@ namespace monkey::evaluator {
             return (object::Object *) (&MY_NULL);
         }
     }
+
+    object::Object *Evaluator::evalIfExpression(ast::IfExpression *expression) { // NOLINT(*-no-recursion)
+        auto * condition = Eval(expression->getCondition());
+
+        if (isTruthy(condition)) {
+            return Eval(expression->getConsequence());
+        }
+        // 如果分支不为空
+        else if (auto * alternative = expression->getAlternative()) {
+            return Eval(alternative);
+        }
+        else {
+            return (object::Object *) &MY_NULL;
+        }
+    }
+
+    bool Evaluator::isTruthy(object::Object *object) {
+        // 如果为空， 这个值为假
+        if (object == (object::Object*) &MY_NULL || object == (object::Object*) &FALSE) {
+            return false;
+        }
+        else if (object == (object::Object*) &TRUE) {
+            return true;
+        }
+
+        // 其他值一律设为 true (对象存在)
+        return true;
+
+    }
+
+    object::Object *Evaluator::evalBlockStatement(monkey::ast::BlockStatement *block) { // NOLINT(*-no-recursion)
+        auto * result = new object::Object();
+
+        for (const auto & statement : block->getStatements()) {
+            result = Eval(statement);
+
+            if (result && result->Type() == object::RETURN_VALUE_OBJ) {
+                return result;
+            }
+        }
+
+        return result;
+    }
+
 }
 
 // 定义变量
@@ -165,6 +227,10 @@ namespace monkey::evaluator {
 const monkey::object::Boolean monkey::evaluator::Evaluator::TRUE = object::Boolean(true);
 const monkey::object::Boolean monkey::evaluator::Evaluator::FALSE = object::Boolean(false);
 const monkey::object::Null monkey::evaluator::Evaluator::MY_NULL = object::Null();
+
+
+
+
 
 
 

@@ -3,8 +3,11 @@
 //
 
 #include "Evaluator.h"
+
 #include <iostream>
 #include <utility>
+#include <variant>
+
 #include "../lexer/Lexer.h"
 #include "../parser/Parser.h"
 
@@ -14,7 +17,9 @@ using namespace monkey;
 using std::cout;
 using std::endl;
 using std::cerr;
-
+using std::variant;
+using std::holds_alternative;
+using std::get;
 
 
 
@@ -65,6 +70,20 @@ bool testBooleanObject(object::Object* object, bool expected) {
 
     return true;
 }
+
+// 测试 null 对象 (判断是否是 Null 对象 )
+bool testNullObject(object::Object* object) {
+    if (object != (object::Object *)(&evaluator::Evaluator::MY_NULL)) {
+        cout << "object " << object->Inspect() << " is not NULL. ";
+        cout << " But " << object->Type() << endl;
+        return false;
+    }
+
+    return true;
+}
+
+
+
 
 
 /****************************** 测试函数 **************************/
@@ -173,4 +192,69 @@ void testBangOperator() {
     }
 
     cout << "Test testBangOperator() END: " << getResult(flag) << endl;
+}
+
+void testIfElseExpressions() {
+    cout << "Test testIfElseExpressions() START:" << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        variant<long long, void*> expected;
+    };
+
+    vector<TestType> tests =  {
+            {"if (true) { 10 }", 10},
+            {"if (false) { 10 }", nullptr},
+            {"if (1) { 10 }", 10},
+            {"if (1 < 2) { 10 }", 10},
+            {"if (1 > 2) { 10 }", nullptr},
+            {"if (1 > 2) { 10 } else { 20 }", 20},
+            {"if (1 < 2) { 10 } else { 20 }", 10}
+    };
+
+    for (const auto & test : tests) {
+        auto * evaluated = testEval(test.input);
+        if (holds_alternative<long long>(test.expected)) {
+            if (!testIntegerObject(evaluated, get<long long>(test.expected))) {
+                flag = false;
+            }
+        }
+        else if (holds_alternative<void *>(test.expected)) {
+            if (!testNullObject(evaluated)) {
+                flag = false;
+            }
+        }
+    }
+
+    cout << "Test testIfElseExpressions() END: " << getResult(flag) << endl;
+}
+
+void testReturnStatement() {
+    cout << "Test testReturnStatement() START:" << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        long long expected;
+    };
+
+    vector<TestType> tests = {
+            {"return 10;", 10},
+            {"return 10; 9;", 10},
+            {"return 2 * 5; 9;", 10},
+            {"9; return 2 * 5; 9;", 10},
+            {"if (true) { if(!false) { return 23;} return 3;} else { return 232;}", 23}
+    };
+
+    for (const auto & test : tests) {
+        auto * evaluated = testEval(test.input);
+        if (!testIntegerObject(evaluated, test.expected)) {
+            flag = false;
+        }
+    }
+
+    cout << "Test testReturnStatement() END: " << getResult(flag) << endl;
 }

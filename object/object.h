@@ -22,6 +22,8 @@ namespace monkey::object {
     extern const ObjectType BOOLEAN_OBJ;
     // 空值
     extern const ObjectType NULL_OBJ;
+    // return 值
+    extern const ObjectType RETURN_VALUE_OBJ;
 }
 
 
@@ -86,6 +88,36 @@ namespace monkey::object {
         ObjectType Type() override;
 
         string Inspect() override;
+
+    };
+
+
+    class ReturnValue : virtual public Object {
+    private:
+        Object* Value; // 返回的对象
+
+    public:
+        /**
+         * 构造函数， 传入 value 对象
+         * @param value
+         */
+        explicit ReturnValue(Object* value) : Value(value) {};
+
+        ObjectType Type() override;
+
+        string Inspect() override;
+
+        /**
+         * 从外部获取值
+         * @return 返回引用: 可以从外部修改
+         */
+        [[maybe_unused]] object::Object*& getValue();
+
+        /**
+         * 从外部设置值
+         * @param value object::Object* & 引用
+         */
+        [[maybe_unused]] void setValue(object::Object* & value);
 
     };
 

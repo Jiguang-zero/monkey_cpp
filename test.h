@@ -71,6 +71,12 @@ void testEvaluator() {
 
     testBangOperator();
 
+    testIfElseExpressions();
+
+    testReturnStatement();
+
+
+
     cout << "Test evaluator END" << endl;
 
     cout << endl;

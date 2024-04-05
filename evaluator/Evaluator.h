@@ -18,8 +18,15 @@ namespace monkey::evaluator {
          * @param stmts std::vector<ast::Statements*>
          * @return object::Object*
          */
-        static object::Object* evalStatements(const std::vector<ast::Statement*>& stmts);
+        static object::Object* evalProgram(const std::vector<ast::Statement *> &stmts);
 
+
+        /**
+         * 解析语句块 {}
+         * @param block  ast::BlockStatement*
+         * @return object::Object*
+         */
+        static object::Object* evalBlockStatement(ast::BlockStatement* block);
 
         /**
          * 获取 布尔值对象 (要么为真，要么为假)
@@ -67,6 +74,20 @@ namespace monkey::evaluator {
          * @return
          */
         static object::Object* evalInfixIntegerExpression(const string& op, object::Object* left, object::Object* right);
+
+        /**
+         * 解析 if 表达式
+         * @param expression ast::IfExpression*
+         * @return object::Object *
+         */
+        static object::Object* evalIfExpression(ast::IfExpression * expression);
+
+        /**
+         * 判断 对象 是否是 真(TRUE)
+         * @param object object::Object*
+         * @return bool
+         */
+        static bool isTruthy(object::Object* object);
 
     public:
 

@@ -45,6 +45,22 @@ namespace monkey::object {
     string Null::Inspect() {
         return "null";
     }
+
+    ObjectType ReturnValue::Type() {
+        return RETURN_VALUE_OBJ;
+    }
+
+    string ReturnValue::Inspect() {
+        return Value->Inspect();
+    }
+
+    [[maybe_unused]] object::Object *&ReturnValue::getValue() {
+        return Value;
+    }
+
+    [[maybe_unused]] void ReturnValue::setValue(Object *&value) {
+        Value = value;
+    }
 }
 
 // 定义变量
@@ -52,4 +68,5 @@ namespace monkey::object {
     const ObjectType INTEGER_OBJ = "INTEGER";
     const ObjectType BOOLEAN_OBJ = "BOOLEAN";
     const ObjectType NULL_OBJ = "NULL";
+    const ObjectType RETURN_VALUE_OBJ = "RETURN_VALUE";
 }
