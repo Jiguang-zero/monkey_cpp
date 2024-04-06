@@ -264,7 +264,7 @@
             return oss.str();
         }
 
-        CallExpression::CallExpression(token::Token token) {
+        [[maybe_unused]] CallExpression::CallExpression(token::Token token) {
             Token = std::move(token);
             Function = nullptr;
         }

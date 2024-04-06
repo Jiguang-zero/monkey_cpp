@@ -79,6 +79,10 @@ void testEvaluator() {
 
     testLetStatement();
 
+    testFunctionObject();
+
+    testFunctionApplication();
+
     cout << "Test evaluator END" << endl;
 
     cout << endl;

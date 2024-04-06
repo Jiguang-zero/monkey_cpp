@@ -7,7 +7,6 @@
 
 #include "ast.h"
 #include "../token/Token.h"
-//#include "Statement.h"
 
 
 
@@ -330,7 +329,7 @@
              * 构造函数
              * @param token
              */
-            explicit CallExpression(token::Token token);
+            [[maybe_unused]] explicit CallExpression(token::Token token);
 
             /**
              * 构造函数

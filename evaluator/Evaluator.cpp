@@ -85,6 +85,29 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(ast::Node *node, obje
         return res;
     }
 
+    // 函数 定义
+    else if (auto * functionLiteral = dynamic_cast<ast::FunctionLiteral*>(node)) {
+        auto params = functionLiteral->getParameters();
+        auto * body = functionLiteral->getBody();
+
+        return new object::Function(params, body, env);
+    }
+
+    // 函数调用
+    else if (auto * callExpression = dynamic_cast<ast::CallExpression*>(node)) {
+        auto * function = Eval(callExpression->getFunction(), env);
+        if (isError(function)) {
+            return function;
+        }
+
+        auto args = evalExpressions(callExpression->getArguments(), env);
+        if (args.size() == 1 && isError(args[0])) {
+            return args[0];
+        }
+
+        return applyFunction(function, args);
+    }
+
     return nullptr;
 }
 
@@ -285,6 +308,58 @@ namespace monkey::evaluator {
 
         return val;
     }
+
+    vector<object::Object *>
+    Evaluator::evalExpressions(const vector<ast::Expression *>& exps, monkey::object::Environment *env) { // NOLINT(*-no-recursion)
+        vector<object::Object*> result;
+
+        for (const auto & e : exps) {
+            auto * evaluated = Eval(e, env);
+            if (isError(evaluated)) {
+                // 只要有一个错误就返回错误，此时参数数组的大小肯定为1
+                return {evaluated};
+            }
+            result.emplace_back(evaluated);
+        }
+
+        return result;
+    }
+
+    object::Object *
+    Evaluator::applyFunction(monkey::object::Object *fn, const vector<object::Object *>& args) { // NOLINT(*-no-recursion)
+        auto * function = dynamic_cast<object::Function*>(fn);
+        if (!function) {
+            return newError("not a function: " + fn->Type());
+        }
+
+        //TODO: 处理参数不匹配的错误 e.g. let add = fn(a, b); let func = fn(a, b, f) {f(a, b)};  此时传入 func(1, 2) 程序会退出
+
+        auto * extendedEnv = extendedFunctionEnv(function, args);
+        auto * evaluated = Eval(function->getBody(), extendedEnv);
+
+        return unwrapReturnValue(evaluated);
+    }
+
+    object::Environment *
+    Evaluator::extendedFunctionEnv(monkey::object::Function * fn, const vector<object::Object *>& args) {
+        auto * env = object::Environment::NewEnclosedEnvironment(fn->getEnv());
+
+        int i = 0;
+        for (const auto & param : fn->getParameters()) {
+            env->Set(param->getValue(), args[i ++]);
+        }
+
+        return env;
+    }
+
+    object::Object *Evaluator::unwrapReturnValue(monkey::object::Object *obj) {
+        if (auto returnValue = dynamic_cast<object::ReturnValue*>(obj)) {
+            return returnValue->getValue();
+        }
+
+        return obj;
+    }
+
 }
 
 // 定义变量
@@ -292,4 +367,10 @@ namespace monkey::evaluator {
 const monkey::object::Boolean monkey::evaluator::Evaluator::TRUE = object::Boolean(true);
 const monkey::object::Boolean monkey::evaluator::Evaluator::FALSE = object::Boolean(false);
 const monkey::object::Null monkey::evaluator::Evaluator::MY_NULL = object::Null();
+
+
+
+
+
+
 

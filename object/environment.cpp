@@ -12,12 +12,21 @@ monkey::object::Object* monkey::object::Environment::Set(const string &name, mon
     return val;
 }
 
-monkey::object::Object *monkey::object::Environment::Get(const string &name) {
+monkey::object::Object *monkey::object::Environment::Get(const string &name) { // NOLINT(*-no-recursion)
     auto it = store.find(name);
     if (it != store.end()) {
         return it->second;
     }
+    else if (it == store.end() && outer != nullptr) {
+        return outer->Get(name);
+    }
     else {
         return nullptr;
     }
+}
+
+monkey::object::Environment *monkey::object::Environment::NewEnclosedEnvironment(monkey::object::Environment *outer) {
+    auto * env = NewEnvironment();
+    env->setOuter(outer);
+    return env;
 }

@@ -7,7 +7,7 @@
 #define MONKEY_EVALUATOR_H
 
 #include "../object/environment.h"
-#include "../ast/program.h"
+#include "../ast/Program.h"
 
 
 namespace monkey::evaluator {
@@ -114,6 +114,42 @@ namespace monkey::evaluator {
          */
         static object::Object * evalIdentifier(ast::Identifier* node, object::Environment*& env);
 
+        /**
+         * 解析表达式组，并返回对象组 ( 比如函数调用 add(2 + 2, 3 + 34); 2 + 2, 3 + 34都是表达式
+         * @param exps vector<ast::Expression*>
+         * @param env object::Environment*
+         * @return vector <object::Object*>
+         */
+        static vector<object::Object*> evalExpressions(
+                const vector<ast::Expression*>& exps,
+                object::Environment* env
+                );
+
+        /**
+         * 对 函数调用 进行求值解析
+         * @param fn object::Object*
+         * @param args vector<object::Object*>
+         * @return object::Object*
+         */
+        static object::Object* applyFunction(object::Object* fn, const vector<object::Object*>& args);
+
+        /**
+         * 将函数定义的环境和调用函数的环境绑定在一块 进行拓展
+         * @param fn
+         * @param args
+         * @return object::Environment*
+         * @instruction 关于这个函数实现环境的拓展的问题：
+         * 环境的拓展是将函数调用的环境拓展到环境定义的环境中
+         * 这样的作用是可以实现函数闭包等功能。比如 fn(x) {fn(y) {x + y};} 需要将外部x应用到这个函数内部中
+         */
+        static object::Environment* extendedFunctionEnv(object::Function* fn, const vector<object::Object*>& args);
+
+        /**
+         * 如果对象是 return 类型，就返回 return 对象 的值 , 否则返回对象本身
+         * @param obj
+         * @return
+         */
+        static object::Object* unwrapReturnValue(object::Object* obj);
     public:
 
         /**

@@ -353,3 +353,65 @@ void testLetStatement() {
 
     cout << "Test testLetStatement() END: " << getResult(flag) << endl;
 }
+
+void testFunctionObject() {
+    cout << "Test testFunctionObject() START:" << endl;
+
+    bool flag(true);
+
+    string input = "fn(x) { x + 2;}";
+
+    auto * evaluated = testEval(input);
+    auto * fn = dynamic_cast<object::Function*>(evaluated);
+    if (!fn) {
+        cerr << "Get object::Function FAILED." << endl;
+        return;
+    }
+
+    if (fn->getParameters().size() != 1) {
+        cout << "function has wrong parameters: " << fn->getParameters().size() << endl;
+        flag = false;
+    }
+
+    if (fn->getParameters()[0]->String() != "x") {
+        cout << "parameter is not 'x', but " << fn->getParameters()[0]->String() << endl;
+        flag = false;
+    }
+
+    string expectedBody = "(x + 2)";
+
+    if (fn->getBody()->String() != expectedBody) {
+        cout << "body is not " << expectedBody << " but " << fn->getBody()->String() << endl;
+        flag = false;
+    }
+
+    cout << "Test testFunctionObject() END: " << getResult(flag) << endl;
+}
+
+void testFunctionApplication() {
+    cout << "Test testFunctionApplication() START:" << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        long long expected;
+    };
+
+    vector<TestType> tests = {
+            {"let identity = fn(x) { x; }; identity(5);", 5},
+            {"let identity = fn(x) { return x; }; identity(5);", 5},
+            {"let double = fn(x) { x * 2; }; double(5);", 10},
+            {"let add = fn(x, y) { x + y; }; add(5, 5);", 10},
+            {"let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
+            {"fn(x) { x; }(5)", 5}
+    };
+
+    for (const auto & test :tests) {
+        if (!testIntegerObject(testEval(test.input), test.expected)) {
+            flag = false;
+        }
+    }
+
+    cout << "Test testFunctionApplication() END: " << getResult(flag) << endl;
+}

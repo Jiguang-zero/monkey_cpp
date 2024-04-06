@@ -18,11 +18,12 @@ namespace monkey::object {
     class Environment {
     private:
         map<string, Object*> store;
+        Environment* outer;
 
         /**
          * 构造函数设为私有， 无法从外部访问，只能通过 NewEnvironment 访问
          */
-        Environment() = default;
+        Environment() : outer(nullptr) {};
 
     public:
         /**
@@ -32,6 +33,21 @@ namespace monkey::object {
         static Environment* NewEnvironment() {
             return new Environment();
         }
+
+        /**
+         * 从外部设置 outer
+         * @param o Environment* outer
+         */
+        [[maybe_unused]] void setOuter(Environment* o) {
+            outer = o;
+        }
+
+        /**
+         * 基于已有的环境创建新的环境
+         * @param outer Environment*
+         * @return Environment*
+         */
+        static Environment* NewEnclosedEnvironment(Environment* outer);
 
         /**
          * 从环境 map 存储中 获取对象

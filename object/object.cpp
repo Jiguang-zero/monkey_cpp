@@ -73,6 +73,48 @@ namespace monkey::object {
     [[maybe_unused]] string Error::getMessage() const {
         return Message;
     }
+
+    ObjectType Function::Type() {
+        return FUNCTION_OBJ;
+    }
+
+    string Function::Inspect() {
+        std::ostringstream oss;
+
+        vector<string> params;
+        for (const auto & p : Parameters) {
+            params.emplace_back(p->String());
+        }
+
+        oss << "fn";
+        oss << "(";
+        oss << std::accumulate(
+                params.begin(),
+                params.end(),
+                string(),
+                [] (const string& a, const string& b) -> string {
+                    return a + (a.length() > 0 ? ", " : "") + b;
+                }
+        );
+        oss << ") {\n";
+        oss << Body->String();
+        oss << "\n}";
+
+
+        return oss.str();
+    }
+
+    [[maybe_unused]] vector<ast::Identifier *> Function::getParameters() {
+        return Parameters;
+    }
+
+    [[maybe_unused]] ast::BlockStatement *Function::getBody() {
+        return Body;
+    }
+
+    [[maybe_unused]] Environment *Function::getEnv() {
+        return Env;
+    }
 }
 
 // 定义变量
@@ -82,4 +124,5 @@ namespace monkey::object {
     const ObjectType NULL_OBJ = "NULL";
     const ObjectType RETURN_VALUE_OBJ = "RETURN_VALUE";
     const ObjectType ERROR_OBJ = "ERROR";
+    const ObjectType FUNCTION_OBJ = "FUNCTION";
 }

@@ -7,13 +7,19 @@
 
 #include <string>
 #include <utility>
+#include <vector>
+#include <numeric>
 
+#include "../ast/Program.h"
 
 using std::string;
+using std::vector;
 
 
 // 定义变量
 namespace monkey::object {
+    class Environment; // 声明
+
     typedef string ObjectType;
 
 
@@ -27,6 +33,9 @@ namespace monkey::object {
     extern const ObjectType RETURN_VALUE_OBJ;
     // 错误
     extern const ObjectType ERROR_OBJ;
+
+    // 函数
+    extern const ObjectType FUNCTION_OBJ;
 }
 
 
@@ -144,6 +153,48 @@ namespace monkey::object {
 
         string Inspect() override;
 
+    };
+
+    /**
+     * 函数对象
+     */
+    class Function : virtual public Object {
+    private:
+        vector<ast::Identifier*> Parameters; // 参数
+        ast::BlockStatement* Body; // 函数的内容
+        Environment* Env; // 函数对应的环境
+
+    public:
+        /**
+         * 构造函数
+         * @param parameters vector<ast::Identifier*>
+         * @param body ast::BlockStatement*
+         * @param env Environment*
+         */
+        Function(vector<ast::Identifier*> parameters, ast::BlockStatement* body, Environment* env)
+            : Parameters(std::move(parameters)), Body(body), Env(env) {};
+
+        ObjectType Type() override;
+
+        string Inspect() override;
+
+        /**
+         * 从外部获取参数
+         * @return vector<ast::Identifier*>
+         */
+        [[maybe_unused]] vector<ast::Identifier*> getParameters();
+
+        /**
+         * 从外部获取 Body
+         * @return ast::BlockStatement*
+         */
+        [[maybe_unused]] ast::BlockStatement* getBody();
+
+        /**
+         * 从外部获取函数的环境
+         * @return Environment*
+         */
+        [[maybe_unused]] Environment* getEnv();
     };
 
 }
