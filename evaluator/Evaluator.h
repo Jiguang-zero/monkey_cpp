@@ -89,6 +89,20 @@ namespace monkey::evaluator {
          */
         static bool isTruthy(object::Object* object);
 
+        /**
+         * 传入参数 error
+         * @param error string
+         * @return object::Error*
+         */
+        static object::Error* newError(const string& error);
+
+        /**
+         * 判断对象是否是错误对象
+         * @param obj  object::Object*
+         * @return  bool
+         */
+        static bool isError(object::Object* obj);
+
     public:
 
         /**

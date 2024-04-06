@@ -6,6 +6,7 @@
 #define MONKEY_OBJECT_H
 
 #include <string>
+#include <utility>
 
 
 using std::string;
@@ -24,6 +25,8 @@ namespace monkey::object {
     extern const ObjectType NULL_OBJ;
     // return 值
     extern const ObjectType RETURN_VALUE_OBJ;
+    // 错误
+    extern const ObjectType ERROR_OBJ;
 }
 
 
@@ -118,6 +121,28 @@ namespace monkey::object {
          * @param value object::Object* & 引用
          */
         [[maybe_unused]] void setValue(object::Object* & value);
+
+    };
+
+    /**
+     * 错误对象
+     */
+    class Error : virtual public Object {
+    private:
+        string Message;
+
+    public:
+        /**
+         * 构造函数，错误对象的构造只能传入 string 值
+         * @param message
+         */
+        explicit Error(string message) : Message(std::move(message)) {}
+
+        [[maybe_unused]] [[nodiscard]] string getMessage() const;
+
+        ObjectType Type() override;
+
+        string Inspect() override;
 
     };
 

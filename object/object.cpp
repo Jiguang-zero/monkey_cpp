@@ -61,6 +61,18 @@ namespace monkey::object {
     [[maybe_unused]] void ReturnValue::setValue(Object *&value) {
         Value = value;
     }
+
+    ObjectType Error::Type() {
+        return ERROR_OBJ;
+    }
+
+    string Error::Inspect() {
+        return "ERROR: " + Message;
+    }
+
+    [[maybe_unused]] string Error::getMessage() const {
+        return Message;
+    }
 }
 
 // 定义变量
@@ -69,4 +81,5 @@ namespace monkey::object {
     const ObjectType BOOLEAN_OBJ = "BOOLEAN";
     const ObjectType NULL_OBJ = "NULL";
     const ObjectType RETURN_VALUE_OBJ = "RETURN_VALUE";
+    const ObjectType ERROR_OBJ = "ERROR";
 }

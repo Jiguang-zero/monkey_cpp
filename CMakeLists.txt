@@ -14,5 +14,6 @@ add_executable(monkey main.cpp
         ast/Expression.cpp
         object/object.cpp
         evaluator/Evaluator.cpp
+        object/environment.cpp
 )
 

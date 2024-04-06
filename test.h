@@ -75,7 +75,7 @@ void testEvaluator() {
 
     testReturnStatement();
 
-
+    testErrorHandling();
 
     cout << "Test evaluator END" << endl;
 
