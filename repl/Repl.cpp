@@ -14,6 +14,7 @@ using monkey::parser::Parser;
 namespace monkey {
     namespace repl {
         void Repl::Start(istream &in, ostream &out) {
+            auto * env = object::Environment::NewEnvironment();
             while (true) {
                 out << PROMPT;
 
@@ -34,18 +35,19 @@ namespace monkey {
                     continue;
                 }
 
-                auto * evaluated = evaluator::Evaluator::Eval(program);
+                auto * evaluated = evaluator::Evaluator::Eval(program, env);
                 if (evaluated) {
                     out << evaluated->Inspect();
                     out << endl;
                 }
 
-                if (evaluated != &evaluator::Evaluator::MY_NULL &&
-                    evaluated != &evaluator::Evaluator::TRUE &&
-                    evaluated != &evaluator::Evaluator::FALSE ) {
-                    // 如果是布尔值 或者是空值，不应该删除。。。
-                    delete evaluated;
-                }
+                // 值需要存储在环境中，所以不应该释放
+//                if (evaluated != &evaluator::Evaluator::MY_NULL &&
+//                    evaluated != &evaluator::Evaluator::TRUE &&
+//                    evaluated != &evaluator::Evaluator::FALSE) {
+//                    // 如果是布尔值 或者是空值，不应该删除。。。
+//                    delete evaluated;
+//                }
 
                 // 释放空间
                 delete program;

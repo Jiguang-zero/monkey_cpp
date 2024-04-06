@@ -6,7 +6,7 @@
 #ifndef MONKEY_EVALUATOR_H
 #define MONKEY_EVALUATOR_H
 
-#include "../object/object.h"
+#include "../object/environment.h"
 #include "../ast/program.h"
 
 
@@ -16,17 +16,19 @@ namespace monkey::evaluator {
         /**
          * 对语句进行求值
          * @param stmts std::vector<ast::Statements*>
+         * @param env object::Environment*&
          * @return object::Object*
          */
-        static object::Object* evalProgram(const std::vector<ast::Statement *> &stmts);
+        static object::Object *evalProgram(const std::vector<ast::Statement *> &stmts, object::Environment *& env);
 
 
         /**
          * 解析语句块 {}
          * @param block  ast::BlockStatement*
+         * @param env object::Environment *&
          * @return object::Object*
          */
-        static object::Object* evalBlockStatement(ast::BlockStatement* block);
+        static object::Object *evalBlockStatement(ast::BlockStatement *block, object::Environment *& env);
 
         /**
          * 获取 布尔值对象 (要么为真，要么为假)
@@ -78,9 +80,10 @@ namespace monkey::evaluator {
         /**
          * 解析 if 表达式
          * @param expression ast::IfExpression*
+         * @param env object::Environment *&
          * @return object::Object *
          */
-        static object::Object* evalIfExpression(ast::IfExpression * expression);
+        static object::Object *evalIfExpression(ast::IfExpression *expression, object::Environment *& env);
 
         /**
          * 判断 对象 是否是 真(TRUE)
@@ -103,14 +106,23 @@ namespace monkey::evaluator {
          */
         static bool isError(object::Object* obj);
 
+        /**
+         * 解析 标识符
+         * @param node ast::Identifier*
+         * @param env object::Environment*
+         * @return object::Object*
+         */
+        static object::Object * evalIdentifier(ast::Identifier* node, object::Environment*& env);
+
     public:
 
         /**
         * 对 节点 进行求值
-        * @param node ast::Node * , 指向 node  的指针
+        * @param node ast::Node * , 指向 node
+        * @param env object::Environment * & ,需要传入引用，进行修改环境
         * @return Object* 返回求值对象
         */
-        static object::Object* Eval(ast::Node* node);
+        static object::Object *Eval(ast::Node *node, object::Environment *& env);
 
     // 成员
     public:

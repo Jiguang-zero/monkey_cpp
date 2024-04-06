@@ -34,8 +34,9 @@ object::Object* testEval(string input) {
     auto * p = parser::Parser::New(l);
 
     auto * program = p->ParseProgram();
+    auto * env = object::Environment::NewEnvironment();
 
-    return evaluator::Evaluator::Eval(program);
+    return evaluator::Evaluator::Eval(program, env);
 
 }
 
@@ -47,8 +48,8 @@ bool testIntegerObject(object::Object* object, long long expected) {
         return false;
     }
 
-    if (auto value = result->getValue() != expected) {
-        cout << "object has wrong value. got " << value << " want " << expected << endl;
+    if (result->getValue() != expected) {
+        cout << "object has wrong value. got " << result->getValue() << " want " << expected << endl;
         return false;
     }
 
@@ -299,8 +300,8 @@ void testErrorHandling() {
                 "unknown operator: BOOLEAN + BOOLEAN"
             },
             {
-                    "foobar",
-                    "identifier not found: foobar",
+                    "foo_bar",
+                    "identifier not found: foo_bar",
             }
     };
 
@@ -324,4 +325,31 @@ void testErrorHandling() {
 
 
     cout << "Test testErrorHandling() END: " << getResult(flag) << endl;
+}
+
+void testLetStatement() {
+    cout << "Test testLetStatement() Start:" << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        long long expected;
+    };
+
+    vector<TestType> tests = {
+            {"let a = 5; a;", 5},
+            {"let a = 5 * 5; a;", 25},
+            {"let a = 5; let b = a; b;", 5},
+            {"let a = 5; let b = a; let c = a + b + 5 * 10; c;", 60},
+            {"let a = 5; let c = a * 99; let d = if (c > a) { 99 } else { 100 }; d; ", 99}
+    };
+
+    for (const auto & test : tests) {
+        if (!testIntegerObject(testEval(test.input), test.expected)) {
+            flag = false;
+        }
+    }
+
+    cout << "Test testLetStatement() END: " << getResult(flag) << endl;
 }

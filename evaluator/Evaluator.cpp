@@ -5,15 +5,15 @@
 #include <iostream>
 #include "Evaluator.h"
 
-monkey::object::Object *monkey::evaluator::Evaluator::Eval(monkey::ast::Node *node) { // NOLINT(*-no-recursion)
+monkey::object::Object *monkey::evaluator::Evaluator::Eval(ast::Node *node, object::Environment *& env) { // NOLINT(*-no-recursion)
     // 程序 program
     if (auto * program = dynamic_cast<ast::Program*>(node)) {
-        return evalProgram(program->getStatements());
+        return evalProgram(program->getStatements(), env);
     }
 
     // 表达式语句
     else if (auto * expressionStatements = dynamic_cast<ast::ExpressionStatement*>(node)) {
-        return Eval(expressionStatements->getExpression());
+        return Eval(expressionStatements->getExpression(), env);
     }
 
     // 整数字面量
@@ -29,7 +29,7 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(monkey::ast::Node *no
 
     // 前缀表达式
     else if (auto * prefixExpression = dynamic_cast<ast::PrefixExpression*>(node)) {
-        auto * right = Eval(prefixExpression->getRightExpression());
+        auto * right = Eval(prefixExpression->getRightExpression(), env);
         if (isError(right)) {
             return right;
         }
@@ -38,12 +38,12 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(monkey::ast::Node *no
 
     // 中缀表达式
     else if (auto * infixExpression = dynamic_cast<ast::InfixExpression*>(node)) {
-        auto * left = Eval(infixExpression->getLeft());
+        auto * left = Eval(infixExpression->getLeft(), env);
         if (isError(left)) {
             return left;
         }
 
-        auto * right = Eval(infixExpression->getRight());
+        auto * right = Eval(infixExpression->getRight(), env);
         if (isError(right)) {
             return right;
         }
@@ -53,17 +53,17 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(monkey::ast::Node *no
 
     // 区块语句 (blockStatement)
     else if (auto * blockStatement = dynamic_cast<ast::BlockStatement*>(node)) {
-        return evalBlockStatement(blockStatement);
+        return evalBlockStatement(blockStatement, env);
     }
 
     // 选择语句
     else if (auto * ifExpression = dynamic_cast<ast::IfExpression*>(node)) {
-        return evalIfExpression(ifExpression);
+        return evalIfExpression(ifExpression, env);
     }
 
     // return 语句
     else if (auto * returnStatement = dynamic_cast<ast::ReturnStatement*>(node)) {
-        auto * value = Eval(returnStatement->getReturnValue());
+        auto * value = Eval(returnStatement->getReturnValue(), env);
         if (isError(value)) {
             return value;
         }
@@ -72,20 +72,28 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(monkey::ast::Node *no
 
     // let 语句 (定义声明)
     else if (auto * letStatement = dynamic_cast<ast::LetStatement*>(node)) {
-        auto * value = Eval(letStatement->getValue());
+        auto * value = Eval(letStatement->getValue(), env);
         if (isError(value)) {
             return value;
         }
+        env->Set(letStatement->getName()->getValue(), value);
+    }
+
+    // 标识符 参数名
+    else if (auto * identifier = dynamic_cast<ast::Identifier*>(node)) {
+        auto * res = evalIdentifier(identifier, env);
+        return res;
     }
 
     return nullptr;
 }
 
-monkey::object::Object *monkey::evaluator::Evaluator::evalProgram(const std::vector<ast::Statement *> &stmts) { // NOLINT(*-no-recursion)
+monkey::object::Object *monkey::evaluator::Evaluator::evalProgram(const std::vector<ast::Statement *> &stmts, // NOLINT(*-no-recursion)
+                                                          object::Environment *& env) {
     auto * object = new object::Object();
 
     for (const auto & s : stmts) {
-        object = Eval(s);
+        object = Eval(s, env);
 
         if (auto * returnValue = dynamic_cast<object::ReturnValue*>(object)) {
             return returnValue->getValue();
@@ -208,18 +216,18 @@ namespace monkey::evaluator {
         }
     }
 
-    object::Object *Evaluator::evalIfExpression(ast::IfExpression *expression) { // NOLINT(*-no-recursion)
-        auto * condition = Eval(expression->getCondition());
+    object::Object *Evaluator::evalIfExpression(ast::IfExpression *expression, object::Environment *& env) { // NOLINT(*-no-recursion)
+        auto * condition = Eval(expression->getCondition(), env);
         if (isError(condition)) {
             return condition;
         }
 
         if (isTruthy(condition)) {
-            return Eval(expression->getConsequence());
+            return Eval(expression->getConsequence(), env);
         }
         // 如果分支不为空
         else if (auto * alternative = expression->getAlternative()) {
-            return Eval(alternative);
+                return Eval(alternative, env);
         }
         else {
             return (object::Object *) &MY_NULL;
@@ -240,11 +248,11 @@ namespace monkey::evaluator {
 
     }
 
-    object::Object *Evaluator::evalBlockStatement(monkey::ast::BlockStatement *block) { // NOLINT(*-no-recursion)
+    object::Object *Evaluator::evalBlockStatement(ast::BlockStatement *block, object::Environment *& env) { // NOLINT(*-no-recursion)
         auto * result = new object::Object();
 
         for (const auto & statement : block->getStatements()) {
-            result = Eval(statement);
+            result = Eval(statement, env);
 
             if (result &&
                 (result->Type() == object::RETURN_VALUE_OBJ ||
@@ -268,7 +276,15 @@ namespace monkey::evaluator {
         return false;
     }
 
+    object::Object *
+    Evaluator::evalIdentifier(monkey::ast::Identifier *node, monkey::object::Environment *& env) {
+        auto * val = env->Get(node->getValue());
+        if (val == nullptr) {
+            return newError("identifier not found: " + node->getValue());
+        }
 
+        return val;
+    }
 }
 
 // 定义变量
@@ -276,3 +292,4 @@ namespace monkey::evaluator {
 const monkey::object::Boolean monkey::evaluator::Evaluator::TRUE = object::Boolean(true);
 const monkey::object::Boolean monkey::evaluator::Evaluator::FALSE = object::Boolean(false);
 const monkey::object::Null monkey::evaluator::Evaluator::MY_NULL = object::Null();
+

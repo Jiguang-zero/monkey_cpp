@@ -77,6 +77,8 @@ void testEvaluator() {
 
     testErrorHandling();
 
+    testLetStatement();
+
     cout << "Test evaluator END" << endl;
 
     cout << endl;
