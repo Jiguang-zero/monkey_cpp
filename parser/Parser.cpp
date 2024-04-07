@@ -21,6 +21,7 @@
             p->registerPrefix(token::LPAREN, &Parser::parseGroupedExpression);
             p->registerPrefix(token::IF, &Parser::parseIfExpression);
             p->registerPrefix(token::FUNCTION, &Parser::parseFunctionLiteral);
+            p->registerPrefix(token::STRING, &Parser::parseStringLiteral);
 
             // 注册中缀函数
             p->registerInfix(token::PLUS, &Parser::parseInfixExpression);
@@ -102,20 +103,17 @@
 
         ast::Statement *Parser::parseStatement() {
             token::TokenType type = curToken.getType();
-            auto * statement = new ast::Statement();
 
             if (type == token::LET) {
-                statement = parseLetStatement();
+                return parseLetStatement();
             }
             else if (type == token::RETURN) {
-                statement = parseReturnStatement();
+                return parseReturnStatement();
             }
 
             else {
-                statement = parseExpressionStatement();
+                return parseExpressionStatement();
             }
-
-            return statement;
         }
 
         ast::LetStatement *Parser::parseLetStatement() {
@@ -186,8 +184,7 @@
                 return nullptr;
             }
 
-            auto* leftExp = new ast::Expression();
-            leftExp = (this->*prefix)();
+            auto* leftExp = (this->*prefix)();
 
             while (!peekTokenIs(token::SEMICOLON) && precedence < peekPrecedence()) {
                 auto infix = infixParseFns[peekToken.getType()];
@@ -204,14 +201,10 @@
         }
 
         ast::Expression* Parser::parseIdentifier() {
-            auto * expression = new ast::Expression();
-            expression = new ast::Identifier(curToken, curToken.getLiteral());
-            return expression;
+            return new ast::Identifier(curToken, curToken.getLiteral());
         }
 
         ast::Expression *Parser::parseIntegerLiteral() {
-            auto * expression = new ast::Expression();
-
             auto * integerLiteral = new ast::IntegerLiteral(curToken);
 
             char* endPtr;
@@ -222,15 +215,11 @@
 
             integerLiteral->setValue(value);
 
-            expression = integerLiteral;
-
-            return expression;
+            return integerLiteral;
         }
 
 
         ast::Expression *Parser::parsePrefixExpression() {
-            auto * expression = new ast::Expression();
-
             auto * prefixExpression = new ast::PrefixExpression(curToken, curToken.getLiteral());
 
             nextToken();
@@ -239,9 +228,7 @@
             right = parseExpression(PRECEDENCE::PREFIX);
             prefixExpression->setRightExpression(right);
 
-            expression = prefixExpression;
-
-            return expression;
+            return prefixExpression;
         }
 
         PRECEDENCE Parser::peekPrecedence() {
@@ -253,8 +240,6 @@
         }
 
         ast::Expression * Parser::parseInfixExpression(ast::Expression* left) {
-            auto * expression = new ast::Expression();
-
             auto * infixExpression = new ast::InfixExpression(
                     curToken,
                     left,
@@ -269,9 +254,7 @@
 
             infixExpression->setRightExpression(right);
 
-            expression = infixExpression;
-
-            return expression;
+            return infixExpression;
         }
 
 
@@ -295,22 +278,14 @@
         }
 
         ast::Expression *Parser::parseBoolean() {
-            auto expression = new ast::Expression();
-
-            auto boolExpression = new ast::Boolean(curToken, curTokenIs(token::TOKEN_TRUE));
-
-            expression = boolExpression;
-
-            return expression;
+            return new ast::Boolean(curToken, curTokenIs(token::TOKEN_TRUE));
         }
 
         ast::Expression *Parser::parseGroupedExpression() {
             // 遇到括号选择下一个词法单元
             nextToken();
 
-            auto * expression = new ast::Expression();
-
-            expression = parseExpression(LOWEST);
+            auto * expression = parseExpression(LOWEST);
 
             if (!expectPeek(token::RPAREN)) {
                 return nullptr;
@@ -475,17 +450,13 @@
         }
 
         ast::Expression* Parser::parseCallExpression(ast::Expression *function) {
-            auto * expression = new ast::Expression();
-
             auto * callExpression = new ast::CallExpression(curToken, function);
 
             vector<ast::Expression*> arguments;
             arguments = parseCallArguments();
             callExpression->setArguments(arguments);
 
-            expression = callExpression;
-
-            return expression;
+            return callExpression;
         }
 
         vector<ast::Expression*> Parser::parseCallArguments() {
@@ -524,6 +495,10 @@
             }
 
             return args;
+        }
+
+        ast::Expression *Parser::parseStringLiteral() {
+            return new ast::StringLiteral(curToken, curToken.getLiteral());
         }
     }
 

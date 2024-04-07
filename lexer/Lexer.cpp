@@ -111,6 +111,11 @@ using std::endl;
                     tok = newToken(token::RBRACE, (char)ch);
                     break;
 
+                case '"':
+                    tok.setType(token::STRING);
+                    tok.setLiteral(readString());
+                    break;
+
                 case 0:
                     tok.setType(token::TOKEN_EOF);
                     tok.setLiteral("");
@@ -177,6 +182,18 @@ using std::endl;
             else {
                 return input[readPosition];
             }
+        }
+
+        string Lexer::readString() {
+            //TODO: 转义字符的支持，报错处理
+            int p = position + 1;
+            while (true) {
+                readChar();
+                if (ch == '"' || ch == 0) {
+                    break;
+                }
+            }
+            return input.substr(p, position - p);
         }
     } // monkey
 // lexer

@@ -72,6 +72,12 @@ using std::string;
              */
             char peekChar();
 
+            /**
+             * 读取字符串
+             * @return string
+             */
+            string readString();
+
         public:
             /**
              * 构造函数，传入字符串

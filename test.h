@@ -47,6 +47,8 @@ void testParser() {
 
     testCallExpressionParsing();
 
+    testStringLiteralExpression();
+
     cout << "Test parser END" << endl;
 
     cout << endl;
@@ -82,6 +84,8 @@ void testEvaluator() {
     testFunctionObject();
 
     testFunctionApplication();
+
+    testStringLiteral();
 
     cout << "Test evaluator END" << endl;
 

@@ -415,3 +415,25 @@ void testFunctionApplication() {
 
     cout << "Test testFunctionApplication() END: " << getResult(flag) << endl;
 }
+
+void testStringLiteral() {
+    cout << "Test testStringLiteral() START:" << endl;
+
+    bool flag(true);
+
+    string input = "\"hello world\"";
+
+    auto * evaluated = testEval(input);
+    auto * stringLiteral = dynamic_cast<object::String*>(evaluated);
+    if (!stringLiteral) {
+        cout << "not string. but " << evaluated->Type() << endl;
+        return;
+    }
+
+    if (stringLiteral->getValue() != "hello world") {
+        cout << "no hello world. but " << stringLiteral->getValue() << endl;
+        flag = false;
+    }
+
+    cout << "Test testStringLiteral() END: " << getResult(flag) << endl;
+}

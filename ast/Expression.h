@@ -370,6 +370,36 @@
 
         };
 
+        /**
+         * String 类型 表达式
+         */
+        class StringLiteral : virtual public Expression {
+        private:
+            token::Token Token; // 字符串
+            string Value;
+
+        public:
+            /**
+             * 构造函数
+             * @param token 字符串词法单元
+             * @param value 字符串词法单元的值
+             */
+            StringLiteral(token::Token token, string value) : Token(std::move(token)), Value(std::move(value)) {}
+
+            /**
+             * 从外部获取 Value
+             * @return string , 无法从外部修改
+             */
+            string getValue();
+
+            void expressionNode() override {}
+
+            string TokenLiteral() override;
+
+            string String() override;
+
+        };
+
     } // ast
 
 // monkey

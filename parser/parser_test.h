@@ -863,3 +863,46 @@ void testCallExpressionParsing() {
 
     cout << "Test testCallExpressionParsing() END: " << (flag ? "PASS" : "FAIL") << endl;
 }
+
+void testStringLiteralExpression() {
+    cout << "Test testStringLiteralExpression() START:" << endl;
+
+    bool flag(true);
+
+    string input = "\"foobar\"";
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * literal = dynamic_cast<ast::StringLiteral*>(stmt->getExpression());
+    if (!literal) {
+        cerr << "get ast::StringLiteral Failed." << endl;
+        return;
+    }
+
+    if (literal->getValue() != "foobar") {
+        cout << "value not foobar " << "but " << literal->getValue() << endl;
+        flag = false;
+    }
+
+    if (literal->TokenLiteral() != "foobar") {
+        cout << "TokenLiteral() not foobar but " << literal->TokenLiteral() << endl;
+        flag = false;
+    }
+
+    cout << "Test testStringLiteralExpression() END: " << (flag ? "PASS" : "FAIL") << endl;
+}

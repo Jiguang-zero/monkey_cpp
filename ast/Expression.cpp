@@ -289,5 +289,17 @@
             Token = std::move(token);
             Function = function;
         }
+
+        string StringLiteral::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        string StringLiteral::String() {
+            return Token.getLiteral();
+        }
+
+        string StringLiteral::getValue() {
+            return Value;
+        }
     }
 

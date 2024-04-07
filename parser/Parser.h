@@ -150,6 +150,12 @@
               ast::Expression* parseBoolean();
 
               /**
+               * 解析 string 表达式
+               * @return ast::Expression*
+               */
+              ast::Expression* parseStringLiteral();
+
+              /**
                * 解析 组 表达式 ()括号为一组
                * @return
                */

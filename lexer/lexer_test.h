@@ -23,7 +23,8 @@ void testNextToken() {
             "let result = fn add(five, ten);\n"
             "true false\n"
             "return if else\t"
-            "== !=";
+            "== !=\n"
+            "\"foobar\"";
 
     vector<string> literals = {
             "+",
@@ -68,6 +69,7 @@ void testNextToken() {
             "else",
             "==",
             "!=",
+            "foobar",
 
             ""
     };
@@ -115,6 +117,7 @@ void testNextToken() {
             token::ELSE,
             token::EQ,
             token::NOT_EQ,
+            token::STRING,
 
             token::TOKEN_EOF
     };
@@ -133,11 +136,11 @@ void testNextToken() {
             auto tok = l->NextToken();
 
             if (tok.getLiteral() != literals[i]) {
-                cout << i << ": " << tok.getLiteral() << "Literal: wrong, it should be " << literals[i] << endl;
+                cout << i << ": " << tok.getLiteral() << " Literal: wrong, it should be " << literals[i] << endl;
                 flag = false;
             }
             if (tok.getType() != types[i]) {
-                cout << i << ": " << tok.getType() << "Type: wrong, it should be" << types[i] << endl;
+                cout << i << ": " << tok.getType() << " Type: wrong, it should be " << types[i] << endl;
                 flag = false;
             }
         }

@@ -115,12 +115,25 @@ namespace monkey::object {
     [[maybe_unused]] Environment *Function::getEnv() {
         return Env;
     }
+
+    ObjectType String::Type() {
+        return STRING_OBJ;
+    }
+
+    string String::Inspect() {
+        return Value;
+    }
+
+    string String::getValue() const {
+        return Value;
+    }
 }
 
 // 定义变量
 namespace monkey::object {
     const ObjectType INTEGER_OBJ = "INTEGER";
     const ObjectType BOOLEAN_OBJ = "BOOLEAN";
+    const ObjectType STRING_OBJ = "STRING";
     const ObjectType NULL_OBJ = "NULL";
     const ObjectType RETURN_VALUE_OBJ = "RETURN_VALUE";
     const ObjectType ERROR_OBJ = "ERROR";

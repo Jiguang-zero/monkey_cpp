@@ -27,10 +27,14 @@ namespace monkey::object {
     extern const ObjectType INTEGER_OBJ;
     // 布尔值
     extern const ObjectType BOOLEAN_OBJ;
+    // string
+    extern const ObjectType STRING_OBJ;
+
     // 空值
     extern const ObjectType NULL_OBJ;
     // return 值
     extern const ObjectType RETURN_VALUE_OBJ;
+
     // 错误
     extern const ObjectType ERROR_OBJ;
 
@@ -195,6 +199,20 @@ namespace monkey::object {
          * @return Environment*
          */
         [[maybe_unused]] Environment* getEnv();
+    };
+
+    class String : virtual public Object{
+    private:
+        string Value;
+
+    public:
+        explicit String(string value) : Value(std::move(value)) {}
+
+        ObjectType Type() override;
+
+        string Inspect() override;
+
+        [[nodiscard]] string getValue() const;
     };
 
 }

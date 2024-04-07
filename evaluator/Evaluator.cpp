@@ -108,6 +108,11 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(ast::Node *node, obje
         return applyFunction(function, args);
     }
 
+    // string
+    else if (auto * stringLiteral = dynamic_cast<ast::StringLiteral*>(node)) {
+        return new object::String(stringLiteral->getValue());
+    }
+
     return nullptr;
 }
 
