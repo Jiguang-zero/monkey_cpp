@@ -23,7 +23,7 @@ using std::get;
 
 
 
-/****************************** ¸¨Öúº¯Êý **************************/
+/****************************** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ **************************/
 string getResult(const bool & flag) {
     return flag ? "PASS" : "FAIL";
 }
@@ -40,7 +40,7 @@ object::Object* testEval(string input) {
 
 }
 
-// ²âÊÔInteger Object
+// ï¿½ï¿½ï¿½ï¿½Integer Object
 bool testIntegerObject(object::Object* object, long long expected) {
     auto * result = dynamic_cast<object::Integer*>(object);
     if (!result) {
@@ -56,7 +56,7 @@ bool testIntegerObject(object::Object* object, long long expected) {
     return true;
 }
 
-// ²âÊÔ Boolean object
+// ï¿½ï¿½ï¿½ï¿½ Boolean object
 bool testBooleanObject(object::Object* object, bool expected) {
     auto * result = dynamic_cast<object::Boolean*>(object);
     if (!result) {
@@ -72,7 +72,7 @@ bool testBooleanObject(object::Object* object, bool expected) {
     return true;
 }
 
-// ²âÊÔ null ¶ÔÏó (ÅÐ¶ÏÊÇ·ñÊÇ Null ¶ÔÏó )
+// ï¿½ï¿½ï¿½ï¿½ null ï¿½ï¿½ï¿½ï¿½ (ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ Null ï¿½ï¿½ï¿½ï¿½ )
 bool testNullObject(object::Object* object) {
     if (object != (object::Object *)(&evaluator::Evaluator::MY_NULL)) {
         cout << "object " << object->Inspect() << " is not NULL. ";
@@ -87,7 +87,7 @@ bool testNullObject(object::Object* object) {
 
 
 
-/****************************** ²âÊÔº¯Êý **************************/
+/****************************** ï¿½ï¿½ï¿½Ôºï¿½ï¿½ï¿½ **************************/
 void testEvalIntegerExpression() {
     cout << "Test testEvalIntegerExpression() START:" << endl;
 
@@ -302,7 +302,11 @@ void testErrorHandling() {
             {
                     "foo_bar",
                     "identifier not found: foo_bar",
-            }
+            },
+            {
+                    "\"Hello\" - \"World\"",
+                    "unknown operator: STRING - STRING",
+            },
     };
 
     for (const auto & test : tests) {
@@ -436,4 +440,26 @@ void testStringLiteral() {
     }
 
     cout << "Test testStringLiteral() END: " << getResult(flag) << endl;
+}
+
+void testStringConcatenation() {
+    cout << "Test testStringConcatenation START:" << endl;
+
+    bool flag(true);
+
+    string input = "\"Hello\" + \" \" + \"World!\"";
+
+    auto * evaluated = testEval(input);
+    auto * stringLiteral = dynamic_cast<object::String*>(evaluated);
+    if (!stringLiteral) {
+        cout << "not string. but " << evaluated->Type() << endl;
+        return;
+    }
+
+    if (stringLiteral->getValue() != "Hello World!") {
+        cout << "not Hello World!. but " << stringLiteral->getValue() << endl;
+        flag = false;
+    }
+
+    cout << "Test testStringConcatenation END: " << getResult(flag) << endl;
 }

@@ -78,6 +78,15 @@ namespace monkey::evaluator {
         static object::Object* evalInfixIntegerExpression(const string& op, object::Object* left, object::Object* right);
 
         /**
+         * 对中缀表达式 string类型 进行求值 left.Type() 和 right.Type() 理论上都得是 String_Obj
+         * @param op operator
+         * @param left
+         * @param right
+         * @return
+         */
+        static object::Object* evalInfixStringExpression(const string& op, object::Object* left, object::Object* right);
+
+        /**
          * 解析 if 表达式
          * @param expression ast::IfExpression*
          * @param env object::Environment *&

@@ -189,7 +189,15 @@ namespace monkey::evaluator {
             return evalInfixIntegerExpression(op, left, right);
         }
 
-        // 不是整数，目前就支持布尔值
+        // 字符串
+        else if (left->Type() == object::STRING_OBJ && right->Type() == object::STRING_OBJ) {
+            return evalInfixStringExpression(op, left, right);
+        }
+
+        // 支持布尔值
+        else if (left->Type() != right->Type()) {
+            return newError("type mismatch: " + left->Type() + " " + op + " " + right->Type());
+        }
         else if (op == "==") {
             return nativeBoolToBooleanObject(left == right);
         }
@@ -197,9 +205,7 @@ namespace monkey::evaluator {
             return nativeBoolToBooleanObject(left != right);
         }
 
-        else if (left->Type() != right->Type()) {
-            return newError("type mismatch: " + left->Type() + " " + op + " " + right->Type());
-        }
+
 
         else {
             return newError("unknown operator: " + left->Type() + " " + op + " " + right->Type());
@@ -372,6 +378,18 @@ namespace monkey::evaluator {
 const monkey::object::Boolean monkey::evaluator::Evaluator::TRUE = object::Boolean(true);
 const monkey::object::Boolean monkey::evaluator::Evaluator::FALSE = object::Boolean(false);
 const monkey::object::Null monkey::evaluator::Evaluator::MY_NULL = object::Null();
+
+monkey::object::Object *
+monkey::evaluator::Evaluator::evalInfixStringExpression(const string &op, monkey::object::Object *left,
+                                                        monkey::object::Object *right) {
+    if (op != "+") {
+        return newError("unknown operator: " + left->Type() + " " + op + " " + right->Type());
+    }
+
+    auto leftVal = dynamic_cast<object::String*>(left)->getValue();
+    auto rightVal = dynamic_cast<object::String*>(right)->getValue();
+    return new object::String(leftVal + rightVal);
+}
 
 
 

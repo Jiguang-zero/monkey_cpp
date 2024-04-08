@@ -87,6 +87,8 @@ void testEvaluator() {
 
     testStringLiteral();
 
+    testStringConcatenation();
+
     cout << "Test evaluator END" << endl;
 
     cout << endl;
