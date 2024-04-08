@@ -24,7 +24,8 @@ void testNextToken() {
             "true false\n"
             "return if else\t"
             "== !=\n"
-            "\"foobar\"";
+            "\"foobar\" \t"
+            "[1, 2]; ";
 
     vector<string> literals = {
             "+",
@@ -70,6 +71,12 @@ void testNextToken() {
             "==",
             "!=",
             "foobar",
+            "[",
+            "1",
+            ",",
+            "2",
+            "]",
+            ";",
 
             ""
     };
@@ -118,6 +125,12 @@ void testNextToken() {
             token::EQ,
             token::NOT_EQ,
             token::STRING,
+            token::LBRACKET,
+            token::INTEGER,
+            token::COMMA,
+            token::INTEGER,
+            token::RBRACKET,
+            token::SEMICOLON,
 
             token::TOKEN_EOF
     };

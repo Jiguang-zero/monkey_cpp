@@ -3,7 +3,9 @@
 //
 
 #include <iostream>
+#include "builtin.h"
 #include "Evaluator.h"
+
 
 monkey::object::Object *monkey::evaluator::Evaluator::Eval(ast::Node *node, object::Environment *& env) { // NOLINT(*-no-recursion)
     // 程序 program
@@ -111,6 +113,32 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(ast::Node *node, obje
     // string
     else if (auto * stringLiteral = dynamic_cast<ast::StringLiteral*>(node)) {
         return new object::String(stringLiteral->getValue());
+    }
+
+    // 数组
+    else if (auto * arrayLiteral = dynamic_cast<ast::ArrayLiteral*>(node)) {
+        auto elements = evalExpressions(arrayLiteral->getElements(), env);
+
+        if (elements.size() == 1 && isError(elements[0])) {
+            return elements[0];
+        }
+
+        return new object::Array(elements);
+    }
+
+    // 索引求值
+    else if (auto * indexExpression = dynamic_cast<ast::IndexExpression*>(node)) {
+        auto * left = Eval(indexExpression->getLeft(), env);
+        if (isError(left)) {
+            return left;
+        }
+
+        auto * index = Eval(indexExpression->getIndex(), env);
+        if (isError(index)) {
+            return index;
+        }
+
+        return evalIndexExpression(left, index);
     }
 
     return nullptr;
@@ -313,11 +341,17 @@ namespace monkey::evaluator {
     object::Object *
     Evaluator::evalIdentifier(monkey::ast::Identifier *node, monkey::object::Environment *& env) {
         auto * val = env->Get(node->getValue());
-        if (val == nullptr) {
-            return newError("identifier not found: " + node->getValue());
+        if (val) {
+            return val;
         }
 
-        return val;
+        auto * builtin = builtins[node->getValue()];
+        if (builtin) {
+            return builtin;
+        }
+
+
+        return newError("identifier not found: " + node->getValue());
     }
 
     vector<object::Object *>
@@ -338,17 +372,22 @@ namespace monkey::evaluator {
 
     object::Object *
     Evaluator::applyFunction(monkey::object::Object *fn, const vector<object::Object *>& args) { // NOLINT(*-no-recursion)
-        auto * function = dynamic_cast<object::Function*>(fn);
-        if (!function) {
+        if (auto * function = dynamic_cast<object::Function*>(fn)) {
+            //TODO: 处理参数不匹配的错误 e.g. let add = fn(a, b); let func = fn(a, b, f) {f(a, b)};  此时传入 func(1, 2) 程序会退出
+            auto * extendedEnv = extendedFunctionEnv(function, args);
+            auto * evaluated = Eval(function->getBody(), extendedEnv);
+
+            return unwrapReturnValue(evaluated);
+        }
+
+        else if (auto * builtin = dynamic_cast<object::Builtin*>(fn)) {
+            return builtin->getFn()(args);
+        }
+
+        else {
             return newError("not a function: " + fn->Type());
         }
 
-        //TODO: 处理参数不匹配的错误 e.g. let add = fn(a, b); let func = fn(a, b, f) {f(a, b)};  此时传入 func(1, 2) 程序会退出
-
-        auto * extendedEnv = extendedFunctionEnv(function, args);
-        auto * evaluated = Eval(function->getBody(), extendedEnv);
-
-        return unwrapReturnValue(evaluated);
     }
 
     object::Environment *
@@ -389,6 +428,34 @@ monkey::evaluator::Evaluator::evalInfixStringExpression(const string &op, monkey
     auto leftVal = dynamic_cast<object::String*>(left)->getValue();
     auto rightVal = dynamic_cast<object::String*>(right)->getValue();
     return new object::String(leftVal + rightVal);
+}
+
+monkey::object::Object *
+monkey::evaluator::Evaluator::evalIndexExpression(monkey::object::Object *left, monkey::object::Object *index) {
+    if (left->Type() == object::ARRAY_OBJ && index->Type() == object::INTEGER_OBJ) {
+        return evalArrayIndexExpression(left, index);
+    }
+
+    else {
+        return newError("index operator not supported: " + left->Type());
+    }
+
+
+}
+
+monkey::object::Object *
+monkey::evaluator::Evaluator::evalArrayIndexExpression(monkey::object::Object *array, monkey::object::Object *index) {
+    // 函数调用完成后自动释放空间
+    auto * arrayObject = dynamic_cast<object::Array*>(array);
+
+    auto idx = dynamic_cast<object::Integer*>(index)->getValue();
+    auto maxIndex = static_cast<long long>(arrayObject->getElements().size() - 1);
+
+    if (idx < 0 || idx > maxIndex) {
+        return (object::Object*) (&MY_NULL);
+    }
+
+    return arrayObject->getElements()[idx];
 }
 
 

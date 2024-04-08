@@ -301,5 +301,68 @@
         string StringLiteral::getValue() {
             return Value;
         }
+
+        string ArrayLiteral::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        string ArrayLiteral::String() {
+            std::ostringstream oss;
+
+            std::vector<string> elements;
+            elements.reserve(Elements.size());
+            for (const auto & e : Elements) {
+                elements.emplace_back(e->String());
+            }
+
+            auto params = std::accumulate(
+                    elements.begin(),
+                    elements.end(),
+                    string(),
+                    [] (const string& a, const string& b) -> string {
+                        return a + (a.length() > 0 ? ", " : "") + b;
+                    });
+            oss << "[";
+            oss << params;
+            oss << "]";
+
+            return oss.str();
+        }
+
+        [[maybe_unused]] void ArrayLiteral::setElements(std::vector<Expression *> elements) {
+            Elements = std::move(elements);
+        }
+
+        [[maybe_unused]] std::vector<Expression *> ArrayLiteral::getElements() {
+            return Elements;
+        }
+
+        string IndexExpression::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        string IndexExpression::String() {
+            std::ostringstream oss;
+
+            oss << "(";
+            oss << Left->String();
+            oss << "[";
+            oss << Index->String();
+            oss << "])";
+
+            return oss.str();
+        }
+
+        [[maybe_unused]] Expression *IndexExpression::getLeft() {
+            return Left;
+        }
+
+        [[maybe_unused]] Expression *IndexExpression::getIndex() {
+            return Index;
+        }
+
+        [[maybe_unused]] void IndexExpression::setIndex(Expression *&index) {
+            Index = index;
+        }
     }
 

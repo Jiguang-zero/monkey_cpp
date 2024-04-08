@@ -555,7 +555,15 @@ void testOperatorPrecedenceParsing() {
             TestType("3 < 5 == true", "((3 < 5) == true)"),
             TestType("!(true == true)", "(!(true == true))"),
             TestType("1 + 3 * (3 / 9) - (3 + 3)", "((1 + (3 * (3 / 9))) - (3 + 3))"),
-            TestType("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))")
+            TestType("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
+            {
+                    "a * [1, 2, 3, 4][b * c] * d",
+                    "((a * ([1, 2, 3, 4][(b * c)])) * d)",
+            },
+            {
+                    "add(a * b[2], b[1], 2 * [1, 2][1])",
+                    "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
+            },
     };
 
     for (const auto& test : tests) {
@@ -905,4 +913,89 @@ void testStringLiteralExpression() {
     }
 
     cout << "Test testStringLiteralExpression() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void TestParsingArrayLiterals() {
+    cout << "Test testParsingArrayLiterals() START:" << endl;
+
+    bool flag(true);
+
+    string input = "[1, 2 * 2, 3 + 3]";
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * array = dynamic_cast<ast::ArrayLiteral*>(stmt->getExpression());
+    if (!array) {
+        cerr << "get ast::ArrayLiteral* Failed." << endl;
+        return;
+    }
+
+    if (array->getElements().size() != 3) {
+        cout << "array.elements.size() not 3 but " << array->getElements().size() << endl;
+        flag = false;
+    }
+
+    if (!testIntegerLiteral(array->getElements()[0], 1) ||
+        !testInfixExpression(array->getElements()[1], 2, "*", 2) ||
+        !testInfixExpression(array->getElements()[2], 3, "+", 3)) {
+        flag = false;
+    }
+
+    cout << "Test testParsingArrayLiterals() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testParsingIndexExpressions() {
+    cout << "Test testParsingIndexExpressions() START:" << endl;
+
+    bool flag(true);
+
+    string input = "myArray[1 + 1]";
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * indexExpression = dynamic_cast<ast::IndexExpression*>(stmt->getExpression());
+    if (!indexExpression) {
+        cout << "get ast::IndexExpression Failed." << endl;
+        return;
+    }
+
+    if (!testIdentifier(indexExpression->getLeft(), "myArray")) {
+        flag = false;
+    }
+
+    if (!testInfixExpression(indexExpression->getIndex(), 1, "+", 1)) {
+        flag = false;
+    }
+
+    cout << "Test testParsingIndexExpressions() END: " << (flag ? "PASS" : "FAIL") << endl;
 }

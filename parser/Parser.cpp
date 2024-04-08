@@ -22,6 +22,7 @@
             p->registerPrefix(token::IF, &Parser::parseIfExpression);
             p->registerPrefix(token::FUNCTION, &Parser::parseFunctionLiteral);
             p->registerPrefix(token::STRING, &Parser::parseStringLiteral);
+            p->registerPrefix(token::LBRACKET, &Parser::parseArrayLiteral);
 
             // 注册中缀函数
             p->registerInfix(token::PLUS, &Parser::parseInfixExpression);
@@ -33,6 +34,7 @@
             p->registerInfix(token::LT, &Parser::parseInfixExpression);
             p->registerInfix(token::GT, &Parser::parseInfixExpression);
             p->registerInfix(token::LPAREN, &Parser::parseCallExpression);
+            p->registerInfix(token::LBRACKET, &Parser::parseIndexExpression);
 
 
             // 设置 curToken 与 peekToken
@@ -274,6 +276,9 @@
             if (type == token::LPAREN) {
                 return CALL;
             }
+            if (type == token::LBRACKET) {
+                return INDEX;
+            }
             return LOWEST;
         }
 
@@ -453,16 +458,28 @@
             auto * callExpression = new ast::CallExpression(curToken, function);
 
             vector<ast::Expression*> arguments;
-            arguments = parseCallArguments();
+            arguments = parseExpressionList(token::RPAREN);
             callExpression->setArguments(arguments);
 
             return callExpression;
         }
 
-        vector<ast::Expression*> Parser::parseCallArguments() {
+        ast::Expression *Parser::parseStringLiteral() {
+            return new ast::StringLiteral(curToken, curToken.getLiteral());
+        }
+
+        ast::Expression *Parser::parseArrayLiteral() {
+            auto * array = new ast::ArrayLiteral(curToken);
+
+            array->setElements(parseExpressionList(token::RBRACKET));
+
+            return array;
+        }
+
+        vector<ast::Expression *> Parser::parseExpressionList(const token::TokenType& end) {
             vector<ast::Expression*> args;
 
-            if (peekTokenIs(token::RPAREN)) {
+            if (peekTokenIs(end)) {
                 nextToken();
                 return args;
             }
@@ -476,14 +493,15 @@
                 nextToken();
                 nextToken();
 
-                //TODO: 错误处理 add(a, b, ) // 这种情况
+                //TODO: 错误处理 (a, b, ) , [a, b, ] // 这种情况
+
 
                 auto * argument = new ast::Expression();
                 argument = parseExpression(LOWEST);
                 args.emplace_back(argument);
             }
 
-            if (!expectPeek(token::RPAREN)) {
+            if (!expectPeek(end)) {
                 // 释放空间
                 for (const auto & a : args) {
                     delete a;
@@ -497,8 +515,24 @@
             return args;
         }
 
-        ast::Expression *Parser::parseStringLiteral() {
-            return new ast::StringLiteral(curToken, curToken.getLiteral());
+        ast::Expression *Parser::parseIndexExpression(ast::Expression *left) {
+            auto * indexExpression = new ast::IndexExpression(curToken, left);
+
+            nextToken();
+            auto * index = parseExpression(LOWEST);
+            indexExpression->setIndex(index);
+
+            if (!expectPeek(token::RBRACKET)) {
+                //释放无用空间
+                delete index;
+                index = nullptr;
+                delete indexExpression;
+
+                return nullptr;
+            }
+
+            return indexExpression;
+
         }
     }
 

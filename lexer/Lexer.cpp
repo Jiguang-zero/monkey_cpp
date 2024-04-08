@@ -110,6 +110,12 @@ using std::endl;
                 case '}':
                     tok = newToken(token::RBRACE, (char)ch);
                     break;
+                case '[':
+                    tok = newToken(token::LBRACKET, (char)ch);
+                    break;
+                case ']':
+                    tok = newToken(token::RBRACKET, (char)ch);
+                    break;
 
                 case '"':
                     tok.setType(token::STRING);

@@ -17,7 +17,8 @@
             SUM, // +
             PRODUCT, //*
             PREFIX, // -X or !X
-            CALL // myFunction(x)
+            CALL, // myFunction(x)
+            INDEX // a[call(2)]
         };
 
 
@@ -188,10 +189,24 @@
               ast::Expression* parseCallExpression(ast::Expression* function);
 
               /**
+               * 解析索引表达式
+               * @param left a[] a就是 left
+               * @return
+               */
+              ast::Expression* parseIndexExpression(ast::Expression* left);
+
+              /**
                * 解析 语句块
                * @return ast::BlockStatement
                */
               ast::BlockStatement* parseBlockStatement();
+
+              /**
+               * 解析数组
+               * @return ast::Expression*
+               */
+              ast::Expression* parseArrayLiteral();
+
 
 
             /**
@@ -247,10 +262,11 @@
             vector<ast::Identifier*> parseFunctionParameters();
 
             /**
-             * 解析获取调用函数表达式的所有参数
+             * 解析以逗号分割的列表，最后应该是 end
+             * @param end TokenType
              * @return vector<ast::Expression*>
              */
-            vector<ast::Expression*> parseCallArguments();
+            vector<ast::Expression*> parseExpressionList(const token::TokenType& end);
 
         public:
             /**

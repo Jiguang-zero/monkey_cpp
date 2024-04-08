@@ -400,6 +400,60 @@
 
         };
 
+        /**
+         * 数组类型表达式
+         */
+        class ArrayLiteral : virtual public Expression {
+        private:
+            token::Token Token; // [ 词法单元
+            std::vector<Expression*> Elements; // 数组的元素
+
+        public:
+            explicit ArrayLiteral(token::Token token) : Token(std::move(token)) {}
+
+            [[maybe_unused]] void setElements(std::vector<Expression*> elements);
+
+            /**
+             * 从外部获取 元素， 无法从外部修改
+             * @return
+             */
+            [[maybe_unused]] std::vector<Expression*> getElements();
+
+            void expressionNode() override {}
+
+            string TokenLiteral() override;
+
+            string String() override;
+
+        };
+
+        /**
+         * 索引表达式
+         */
+        class IndexExpression : virtual public Expression {
+        private:
+            token::Token Token; // [ 词法单元
+            Expression* Left;
+            Expression* Index;
+
+        public:
+            explicit IndexExpression(token::Token token, Expression* left) :
+                Token(std::move(token)), Left(left), Index(nullptr) {}
+
+            [[maybe_unused]] void setIndex(Expression*& index);
+
+            [[maybe_unused]] Expression* getLeft();
+
+            [[maybe_unused]] Expression* getIndex();
+
+            void expressionNode() override {}
+
+            string TokenLiteral() override;
+
+            string String() override;
+
+        };
+
     } // ast
 
 // monkey

@@ -127,6 +127,51 @@ namespace monkey::object {
     string String::getValue() const {
         return Value;
     }
+
+    ObjectType Builtin::Type() {
+        return BUILTIN_OBJ;
+    }
+
+    string Builtin::Inspect() {
+        return "builtin function";
+    }
+
+    [[maybe_unused]] BuiltinFunction &Builtin::getFn() {
+        return Fn;
+    }
+
+    ObjectType Array::Type() {
+        return ARRAY_OBJ;
+    }
+
+    string Array::Inspect() {
+        std::ostringstream oss;
+
+        vector<string> elements;
+        elements.reserve(Elements.size());
+        for (const auto & e : Elements) {
+            elements.emplace_back(e->Inspect());
+        }
+
+        auto elementsString = std::accumulate(
+                elements.begin(),
+                elements.end(),
+                string(),
+                [] (const string& a, const string& b) -> string {
+                    return a + (a.empty()? "" : ", ") + b;
+                }
+                );
+
+        oss << "[";
+        oss << elementsString;
+        oss << "]";
+
+        return oss.str();
+    }
+
+    [[maybe_unused]] vector<Object *> Array::getElements() {
+        return Elements;
+    }
 }
 
 // 定义变量
@@ -138,4 +183,6 @@ namespace monkey::object {
     const ObjectType RETURN_VALUE_OBJ = "RETURN_VALUE";
     const ObjectType ERROR_OBJ = "ERROR";
     const ObjectType FUNCTION_OBJ = "FUNCTION";
+    const ObjectType BUILTIN_OBJ = "BUILTIN";
+    const ObjectType ARRAY_OBJ = "ARRAY";
 }

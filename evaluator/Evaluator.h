@@ -102,13 +102,6 @@ namespace monkey::evaluator {
         static bool isTruthy(object::Object* object);
 
         /**
-         * 传入参数 error
-         * @param error string
-         * @return object::Error*
-         */
-        static object::Error* newError(const string& error);
-
-        /**
          * 判断对象是否是错误对象
          * @param obj  object::Object*
          * @return  bool
@@ -159,6 +152,24 @@ namespace monkey::evaluator {
          * @return
          */
         static object::Object* unwrapReturnValue(object::Object* obj);
+
+        /**
+         * 对索引表达式进行具体的求值
+         * @param left
+         * @param index
+         * @return
+         */
+        static object::Object* evalIndexExpression(object::Object* left, object::Object* index);
+
+
+        /**
+         * 对索引表达式的其中一种情况： 数组索引进行求值
+         * @param array Type 是 Array
+         * @param index
+         * @return
+         */
+        static object::Object* evalArrayIndexExpression(object::Object* array, object::Object* index);
+
     public:
 
         /**
@@ -168,6 +179,13 @@ namespace monkey::evaluator {
         * @return Object* 返回求值对象
         */
         static object::Object *Eval(ast::Node *node, object::Environment *& env);
+
+        /**
+        * 传入参数 error
+        * @param error string
+        * @return object::Error*
+        */
+        static object::Error* newError(const string& error);
 
     // 成员
     public:

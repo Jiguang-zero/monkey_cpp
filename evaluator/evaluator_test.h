@@ -23,7 +23,7 @@ using std::get;
 
 
 
-/****************************** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ **************************/
+/****************************** ???????? **************************/
 string getResult(const bool & flag) {
     return flag ? "PASS" : "FAIL";
 }
@@ -40,7 +40,7 @@ object::Object* testEval(string input) {
 
 }
 
-// ï¿½ï¿½ï¿½ï¿½Integer Object
+// ????Integer Object
 bool testIntegerObject(object::Object* object, long long expected) {
     auto * result = dynamic_cast<object::Integer*>(object);
     if (!result) {
@@ -56,7 +56,7 @@ bool testIntegerObject(object::Object* object, long long expected) {
     return true;
 }
 
-// ï¿½ï¿½ï¿½ï¿½ Boolean object
+// ???? Boolean object
 bool testBooleanObject(object::Object* object, bool expected) {
     auto * result = dynamic_cast<object::Boolean*>(object);
     if (!result) {
@@ -72,7 +72,7 @@ bool testBooleanObject(object::Object* object, bool expected) {
     return true;
 }
 
-// ï¿½ï¿½ï¿½ï¿½ null ï¿½ï¿½ï¿½ï¿½ (ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ Null ï¿½ï¿½ï¿½ï¿½ )
+// ???? null ???? (?§Ø?????? Null ???? )
 bool testNullObject(object::Object* object) {
     if (object != (object::Object *)(&evaluator::Evaluator::MY_NULL)) {
         cout << "object " << object->Inspect() << " is not NULL. ";
@@ -87,7 +87,7 @@ bool testNullObject(object::Object* object) {
 
 
 
-/****************************** ï¿½ï¿½ï¿½Ôºï¿½ï¿½ï¿½ **************************/
+/****************************** ??????? **************************/
 void testEvalIntegerExpression() {
     cout << "Test testEvalIntegerExpression() START:" << endl;
 
@@ -304,7 +304,7 @@ void testErrorHandling() {
                     "identifier not found: foo_bar",
             },
             {
-                    "\"Hello\" - \"World\"",
+                    R"("Hello" - "World")",
                     "unknown operator: STRING - STRING",
             },
     };
@@ -447,7 +447,7 @@ void testStringConcatenation() {
 
     bool flag(true);
 
-    string input = "\"Hello\" + \" \" + \"World!\"";
+    string input = R"("Hello" + " " + "World!")";
 
     auto * evaluated = testEval(input);
     auto * stringLiteral = dynamic_cast<object::String*>(evaluated);
@@ -462,4 +462,146 @@ void testStringConcatenation() {
     }
 
     cout << "Test testStringConcatenation END: " << getResult(flag) << endl;
+}
+
+void testBuiltinFunctions() {
+    cout << "Test testBuiltinFunctions() START:" << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        variant<long long, string> expected;
+    };
+
+    vector<TestType> tests {
+            {R"(len(""))", 0},
+            {R"(len("four"))", 4},
+            {R"(len("hello world"))", 11},
+            {R"(len(1))", "argument to `len` not supported, got INTEGER"},
+            {R"(len("one", "two"))", "wrong number of arguments. got=2, want=1"},
+    };
+
+    for (const auto & test : tests) {
+        auto * evaluated = testEval(test.input);
+
+        if (holds_alternative<long long>(test.expected)) {
+            if (!testIntegerObject(evaluated, get<long long>(test.expected))) {
+                flag = false;
+            }
+        }
+        else if (holds_alternative<string>(test.expected)) {
+            auto * errObj = dynamic_cast<object::Error*>(evaluated);
+            if (!errObj) {
+                cout << "get error wrong. " << evaluated->Type() << endl;
+                flag = false;
+                continue;
+            }
+            if (errObj->getMessage() != get<string>(test.expected)) {
+                cout << "wrong error not " << get<string>(test.expected);
+                cout << " but " << errObj->getMessage() << endl;
+                flag = false;
+            }
+        }
+
+    }
+
+    cout << "Test testBuiltinFunctions() END: " << getResult(flag) << endl;
+}
+
+void testEvalArrayLiterals() {
+    cout << "Test testEvalArrayLiterals() START:" << endl;
+
+    bool flag(true);
+
+    string input = "[1, 2 * 2, 3 + 3]";
+
+    auto * evaluated = testEval(input);
+    auto * array = dynamic_cast<object::Array*>(evaluated);
+    if (!array) {
+        cerr << "get array wrong." << endl;
+        return;
+    }
+
+    if (array->getElements().size() != 3) {
+        cout << "elements.size() not 3 but " << array->getElements().size() << endl;
+        flag = false;
+    }
+
+    if (!testIntegerObject(array->getElements()[0], 1) ||
+        !testIntegerObject(array->getElements()[1], 4) ||
+        !testIntegerObject(array->getElements()[2], 6)) {
+        flag = false;
+    }
+
+    cout << "Test testEvalArrayLiterals() END: " << getResult(flag) << endl;
+}
+
+void testEvalArrayIndexExpressions() {
+    cout << "Test testEvalArrayIndexExpressions() START:" << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        variant<long long, void*> expected;
+    };
+
+    vector<TestType> tests = {
+            {"[1, 2, 3][0]",
+                    1,
+            },
+            {
+             "[1, 2, 3][1]",
+                    2,
+            },
+            {
+             "[1, 2, 3][2]",
+                    3,
+            },
+            {
+             "let i = 0; [1][i];",
+                    1,
+            },
+            {
+             "[1, 2, 3][1 + 1];",
+                    3,
+            },
+            {
+             "let myArray = [1, 2, 3]; myArray[2];",
+                    3,
+            },
+            {
+             "let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
+                    6,
+            },
+            {
+             "let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]",
+                    2,
+            },
+            {
+                    "[1, 2, 3][3]",
+                    nullptr,
+            },
+            {
+                    "[1, 2, 3][-1]",
+                    nullptr,
+            }
+    };
+
+    for (const auto & test : tests) {
+        auto * evaluated = testEval(test.input);
+        if (holds_alternative<long long>(test.expected)) {
+            if (!testIntegerObject(evaluated, get<long long>(test.expected))) {
+                flag = false;
+            }
+        }
+        else {
+            if (!testNullObject(evaluated)) {
+                flag = false;
+            }
+        }
+    }
+
+    cout << "Test testEvalArrayIndexExpressions() END: " << getResult(flag) << endl;
 }

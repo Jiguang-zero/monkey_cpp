@@ -49,6 +49,10 @@ void testParser() {
 
     testStringLiteralExpression();
 
+    TestParsingArrayLiterals();
+
+    testParsingIndexExpressions();
+
     cout << "Test parser END" << endl;
 
     cout << endl;
@@ -88,6 +92,12 @@ void testEvaluator() {
     testStringLiteral();
 
     testStringConcatenation();
+
+    testBuiltinFunctions();
+
+    testEvalArrayLiterals();
+
+    testEvalArrayIndexExpressions();
 
     cout << "Test evaluator END" << endl;
 

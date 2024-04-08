@@ -15,5 +15,6 @@ add_executable(monkey main.cpp
         object/object.cpp
         evaluator/Evaluator.cpp
         object/environment.cpp
+        evaluator/builtin.cpp
 )
 

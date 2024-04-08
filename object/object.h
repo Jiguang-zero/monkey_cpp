@@ -40,6 +40,12 @@ namespace monkey::object {
 
     // 函数
     extern const ObjectType FUNCTION_OBJ;
+
+    // 内置函数
+    extern const ObjectType BUILTIN_OBJ;
+
+    // 数组
+    extern const ObjectType ARRAY_OBJ;
 }
 
 
@@ -213,6 +219,43 @@ namespace monkey::object {
         string Inspect() override;
 
         [[nodiscard]] string getValue() const;
+    };
+
+    // 将 返回Object*类型，参数为vector<Object*>的函数命名为 BuiltinFunction
+    typedef Object* (*BuiltinFunction) (const vector<Object*>&);
+
+    class Builtin : virtual public Object {
+    private:
+        BuiltinFunction Fn;
+
+    public:
+        // 构造函数
+        explicit Builtin(BuiltinFunction fn) : Fn(fn) {}
+
+        [[maybe_unused]] BuiltinFunction & getFn();
+
+        ObjectType Type() override;
+
+        string Inspect() override;
+
+    };
+
+    /**
+     * 数组对象
+     */
+    class Array : virtual public Object {
+    private:
+        vector<Object*> Elements;
+
+    public:
+        [[maybe_unused]] vector<Object*> getElements();
+
+        explicit Array(vector<Object*> elements) : Elements(std::move(elements)) {}
+
+        ObjectType Type() override;
+
+        string Inspect() override;
+
     };
 
 }

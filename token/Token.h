@@ -96,7 +96,9 @@ using std::map;
         extern const TokenType LPAREN; // ×óÀ¨ºÅ (
         extern const TokenType RPAREN; // ÓÒÀ¨ºÅ )
         extern const TokenType LBRACE; // ×ó´óÀ¨ºÅ {
-        extern const TokenType RBRACE; // ÓÒ´óÀ¨ºÅ
+        extern const TokenType RBRACE; // ÓÒ´óÀ¨ºÅ }
+        extern const TokenType LBRACKET; // ×óÖÐÀ¨ºÅ [
+        extern const TokenType RBRACKET; // ÓÒÖÐÀ¨ºÅ ]
 
         // ¹Ø¼ü×Ö
         extern const TokenType FUNCTION; // º¯Êý¹Ø¼ü×Ö fn
