@@ -6,7 +6,12 @@
 #define MONKEY_OBJECT_TEST_H
 
 #include "object.h"
+#include <iostream>
 
+using std::cout;
+using std::endl;
+
+using namespace monkey;
 
 void testStringHashKey() {
     cout << "Test testStringHashKey() START:" << endl;
