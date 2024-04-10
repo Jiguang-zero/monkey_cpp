@@ -97,6 +97,9 @@ using std::endl;
                 case ';':
                     tok = newToken(token::SEMICOLON, (char)ch);
                     break;
+                case ':':
+                    tok = newToken(token::COLON, (char)ch);
+                    break;
                     
                 case '(':
                     tok = newToken(token::LPAREN, (char)ch);

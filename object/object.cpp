@@ -22,6 +22,10 @@ namespace monkey::object {
         return Value;
     }
 
+    HashKey Integer::HashKey() {
+        return {Type(), static_cast<size_t>(Value)};
+    }
+
     string Boolean::Inspect() {
         return Value ? "true" : "false";
     }
@@ -36,6 +40,10 @@ namespace monkey::object {
 
     bool Boolean::getValue() const {
         return Value;
+    }
+
+    HashKey Boolean::HashKey() {
+        return {Type(), static_cast<size_t>(Value)};
     }
 
     ObjectType Null::Type() {
@@ -82,6 +90,7 @@ namespace monkey::object {
         std::ostringstream oss;
 
         vector<string> params;
+        params.reserve(Parameters.size());
         for (const auto & p : Parameters) {
             params.emplace_back(p->String());
         }
@@ -128,6 +137,17 @@ namespace monkey::object {
         return Value;
     }
 
+    HashKey String::HashKey() {
+        //DJB Hash Function
+        size_t hash = 5381;
+
+        for (const auto & ch : Value) {
+            hash += (hash << 5) + (ch);
+        }
+
+        return {Type(), (hash & 0x7FFFFFFF)};
+    }
+
     ObjectType Builtin::Type() {
         return BUILTIN_OBJ;
     }
@@ -172,6 +192,59 @@ namespace monkey::object {
     [[maybe_unused]] vector<Object *> Array::getElements() {
         return Elements;
     }
+
+    ObjectType Hash::Type() {
+        return HASH_OBJ;
+    }
+
+    string Hash::Inspect() {
+        std::ostringstream oss;
+
+        vector<string> pairs;
+        pairs.reserve(Pairs.size());
+
+        for (const auto & pair : Pairs) {
+            pairs.emplace_back(
+                    pair.second.Key->Inspect() + ": " + pair.second.Value->Inspect()
+                    );
+        }
+
+        string pairsString = std::accumulate(
+                pairs.begin(),
+                pairs.end(),
+                string(),
+                [](const string& a, const string& b) {
+                    return a + (a.empty() ? "" : ", ") + b;
+                }
+                );
+
+        oss << "{";
+        oss << pairsString;
+        oss << "}";
+
+        return oss.str();
+    }
+
+    [[maybe_unused]] map<HashKey, HashPair> Hash::getPairs() {
+        return Pairs;
+    }
+
+    bool HashKey::operator==(const HashKey &other) const {
+        return Type == other.Type && Value == other.Value;
+    }
+
+    bool HashKey::operator!=(const HashKey &other) const {
+        return Type != other.Type || Value != other.Value;
+    }
+
+    bool HashKey::operator<(const HashKey &other) const {
+        return Value < other.Value;
+    }
+
+    HashPair::HashPair(const HashPair &hashPair) {
+        Key = hashPair.Key;
+        Value = hashPair.Value;
+    }
 }
 
 // 定义变量
@@ -185,4 +258,5 @@ namespace monkey::object {
     const ObjectType FUNCTION_OBJ = "FUNCTION";
     const ObjectType BUILTIN_OBJ = "BUILTIN";
     const ObjectType ARRAY_OBJ = "ARRAY";
+    const ObjectType HASH_OBJ = "HASH";
 }

@@ -9,6 +9,7 @@
 #include "typeinfo"
 #include <tuple>
 #include <variant>
+#include <functional>
 
 
 using std::vector;
@@ -998,4 +999,176 @@ void testParsingIndexExpressions() {
     }
 
     cout << "Test testParsingIndexExpressions() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testParsingHashLiteralsStringKeys() {
+    cout << "Test testParsingHashLiteralsStringKeys() START:" << endl;
+
+    bool flag(true);
+
+    string input = R"({"one" : 1, "two" : 2, "three" : 3})";
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * hash = dynamic_cast<ast::HashLiteral*>(stmt->getExpression());
+    if (!hash) {
+        cerr << "get hash Failed." << endl;
+        return;
+    }
+
+    if (hash->getPairs().size() != 3) {
+        cout << "the size of hash not 3 but " << hash->getPairs().size() << endl;
+        flag = false;
+    }
+
+    map<string, long long> expected = {
+            {"one", 1},
+            {"two", 2},
+            {"three", 3}
+    };
+
+    for (const auto & pair : hash->getPairs()) {
+        auto * literal = dynamic_cast<ast::StringLiteral*>(pair.first);
+        if (!literal) {
+            cout << "key not string but " << pair.first->TokenLiteral() << endl;
+            flag = false;
+        }
+
+        if (!testIntegerLiteral(pair.second, expected[literal->String()])) {
+            flag = false;
+        }
+    }
+
+    cout << "Test testParsingHashLiteralsStringKeys() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testParsingEmptyHashLiteral() {
+    cout << "Test testParsingEmptyHashLiteral() START:" << endl;
+
+    bool flag(true);
+
+    string input = "{}";
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * hash = dynamic_cast<ast::HashLiteral*>(stmt->getExpression());
+    if (!hash) {
+        cerr << "get hash Failed." << endl;
+        return;
+    }
+
+    if (!hash->getPairs().empty()) {
+        cout << "the size of hash not 0 but " << hash->getPairs().size() << endl;
+        flag = false;
+    }
+
+    cout << "Test testParsingEmptyHashLiteral() END: " << (flag ? "PASS" : "FAIL") << endl;
+}
+
+void testParsingHashLiteralsWithExpressions() {
+    cout << "Test testParsingHashLiteralsWithExpressions() START:" << endl;
+
+    bool flag(true);
+
+    string input = R"({"one": 0 + 1, "two": 10 - 8, "three": 15 / 5})";
+
+    auto * l = lexer::Lexer::New(input);
+    auto * p = parser::Parser::New(l);
+
+    auto * program = p->ParseProgram();
+    checkoutParserErrors(p);
+
+    if (program->getStatements().size() != 1) {
+        cout << "program does not contain 1 statement. got " << program->getStatements().size() << endl;
+        flag = false;
+    }
+
+    auto * stmt = dynamic_cast<ast::ExpressionStatement *>(program->getStatements()[0]);
+    if (!stmt) {
+        cerr << "get ast::ExpressionStatement Failed." << endl;
+        return;
+    }
+
+    auto * hash = dynamic_cast<ast::HashLiteral*>(stmt->getExpression());
+    if (!hash) {
+        cerr << "get hash Failed." << endl;
+        return;
+    }
+
+    if (hash->getPairs().size() != 3) {
+        cout << "the size of hash not 3 but " << hash->getPairs().size() << endl;
+        flag = false;
+    }
+
+    map<string, std::function<bool(ast::Expression*)>> tests = {
+            {
+                "one",
+                [](ast::Expression* e) -> bool {
+                    return testInfixExpression(e, 0, "+", 1);
+                }
+            },
+            {
+                "two",
+                [](ast::Expression* e) -> bool {
+                    return testInfixExpression(e, 10, "-", 8);
+                }
+            },
+            {
+                "three",
+                [](ast::Expression* e) -> bool {
+                    return testInfixExpression(e, 15, "/", 5);
+                }
+            }
+    };
+
+    for (const auto & pair : hash->getPairs()) {
+        auto * literal = dynamic_cast<ast::StringLiteral*>(pair.first);
+        if (!literal) {
+            cout << "key not string but " << pair.first->TokenLiteral() << endl;
+            flag = false;
+        }
+
+        auto testFunc = tests[literal->String()];
+        if (!testFunc) {
+            cout << "no test function for " << literal->String() << " found." << endl;
+            flag = false;
+            continue;
+        }
+
+        if (!testFunc(pair.second)) {
+            flag = false;
+        }
+    }
+
+    cout << "Test testParsingHashLiteralsWithExpressions() END: " << (flag ? "PASS" : "FAIL") << endl;
 }

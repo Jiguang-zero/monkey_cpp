@@ -364,5 +364,43 @@
         [[maybe_unused]] void IndexExpression::setIndex(Expression *&index) {
             Index = index;
         }
+
+        string HashLiteral::TokenLiteral() {
+            return Token.getLiteral();
+        }
+
+        string HashLiteral::String() {
+            std::ostringstream oss;
+
+            std::vector<string> pairs;
+            pairs.reserve(Pairs.size());
+
+            for (const auto & p : Pairs) {
+                pairs.emplace_back(p.first->String() + ":" + p.second->String());
+            }
+
+            auto pairsString = std::accumulate(
+                    pairs.begin(),
+                    pairs.end(),
+                    string(),
+                    [] (const string & a, const string & b) -> string {
+                        return a + (a.empty() ? "" : ", ");
+                    }
+                    );
+
+            oss << "{";
+            oss << pairsString;
+            oss << "}";
+
+            return oss.str();
+        }
+
+        [[maybe_unused]] void HashLiteral::setPairs(map<Expression *, Expression *> pairs) {
+            Pairs = std::move(pairs);
+        }
+
+        [[maybe_unused]] map<Expression *, Expression *> HashLiteral::getPairs() {
+            return Pairs;
+        }
     }
 

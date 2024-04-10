@@ -89,6 +89,7 @@ using std::map;
         // 分隔符
         extern const TokenType COMMA; // 逗号
         extern const TokenType SEMICOLON; // 分号
+        extern const TokenType COLON; // 冒号
 
         // 标识符
         extern const TokenType IDENT; // 参数名等

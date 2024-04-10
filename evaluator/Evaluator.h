@@ -170,6 +170,22 @@ namespace monkey::evaluator {
          */
         static object::Object* evalArrayIndexExpression(object::Object* array, object::Object* index);
 
+        /**
+         * 对索引表达式的 哈希类型 进行索引求值
+         * @param hash
+         * @param index
+         * @return
+         */
+        static object::Object* evalHashIndexExpression(object::Object* hash, object::Object* index);
+
+        /**
+         * 对哈希类型 进行求值
+         * @param node
+         * @param env
+         * @return
+         */
+        static object::Object* evalHashLiteral(ast::HashLiteral* node, object::Environment* env);
+
     public:
 
         /**

@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 #include <numeric>
+#include <unordered_map>
 
 #include "../ast/Program.h"
 
@@ -46,6 +47,9 @@ namespace monkey::object {
 
     // 数组
     extern const ObjectType ARRAY_OBJ;
+
+    // 哈希对象
+    extern const ObjectType HASH_OBJ;
 }
 
 
@@ -64,8 +68,40 @@ namespace monkey::object {
         virtual string Inspect() {return "";};
     };
 
+    struct HashKey {
+        ObjectType Type;
+        size_t Value = 0;
 
-    class Integer : virtual public Object {
+        /**
+         * 运算符重载，判断两个 HashKey 是否相等
+         * @param other
+         * @return
+         */
+        bool operator==(const HashKey& other) const;
+
+        /**
+         * 运算符重载，判断两个 HashKey 是否不相等
+         * @param other
+         * @return
+         */
+        bool operator!=(const HashKey& other) const;
+
+        /**
+         * 重载 < 运算符，用于 map 排序
+         * 暂时只根据 哈希值 进行比较
+         * @param other
+         * @return
+         */
+        bool operator<(const HashKey& other) const;
+    };
+
+    class Hashable {
+    public:
+        virtual HashKey HashKey() = 0;
+    };
+
+
+    class Integer : virtual public Object, public Hashable{
     private:
         long long Value = 0;
 
@@ -83,9 +119,11 @@ namespace monkey::object {
         string Inspect() override;
         ObjectType Type() override;
 
+        struct HashKey HashKey() override;
+
     };
 
-    class Boolean : virtual public Object {
+    class Boolean : virtual public Object, public Hashable{
     private:
         // 默认是 true
         bool Value = true;
@@ -102,6 +140,8 @@ namespace monkey::object {
 
         string Inspect() override;
         ObjectType Type() override;
+
+        struct HashKey HashKey() override;
 
     };
 
@@ -207,7 +247,7 @@ namespace monkey::object {
         [[maybe_unused]] Environment* getEnv();
     };
 
-    class String : virtual public Object{
+    class String : virtual public Object, public Hashable{
     private:
         string Value;
 
@@ -219,6 +259,8 @@ namespace monkey::object {
         string Inspect() override;
 
         [[nodiscard]] string getValue() const;
+
+        struct HashKey HashKey() override;
     };
 
     // 将 返回Object*类型，参数为vector<Object*>的函数命名为 BuiltinFunction
@@ -256,6 +298,40 @@ namespace monkey::object {
 
         string Inspect() override;
 
+    };
+
+    struct HashPair {
+        Object* Key;
+        Object* Value;
+
+        HashPair() : Key(nullptr), Value(nullptr) {}
+
+        HashPair(Object* key, Object* value) : Key(key), Value(value) {}
+
+        // 默认复制函数
+        HashPair(const HashPair& hashPair);
+    };
+
+    class Hash : virtual public Object {
+    private:
+        map<HashKey, HashPair> Pairs;
+
+    public:
+        /**
+         * 构造函数，传入 pairs
+         * @param pairs map<HashKey, HashPair>
+         */
+        explicit Hash(map<HashKey, HashPair> pairs) : Pairs(std::move(pairs)) {}
+
+        ObjectType Type() override;
+
+        string Inspect() override;
+
+        /**
+         * 从外部获取 pairs
+         * @return map<HashKey, HashPair>, 非引用，无法从外部更改
+         */
+        [[maybe_unused]] map<HashKey, HashPair> getPairs();
     };
 
 }

@@ -8,6 +8,7 @@
 #include "parser/parser_test.h"
 #include "ast/ast_test.h"
 #include "evaluator/evaluator_test.h"
+#include "object/object_test.h"
 
 // token ≤‚ ‘
 void testToken() {
@@ -52,6 +53,12 @@ void testParser() {
     TestParsingArrayLiterals();
 
     testParsingIndexExpressions();
+
+    testParsingHashLiteralsStringKeys();
+
+    testParsingEmptyHashLiteral();
+
+    testParsingHashLiteralsWithExpressions();
 
     cout << "Test parser END" << endl;
 
@@ -99,7 +106,21 @@ void testEvaluator() {
 
     testEvalArrayIndexExpressions();
 
+    testEvalHashLiterals();
+
+    testHashIndexExpressions();
+
     cout << "Test evaluator END" << endl;
+
+    cout << endl;
+}
+
+void testObject() {
+    cout << "Test object START: " << endl;
+
+    testStringHashKey();
+
+    cout << "Test object END" << endl;
 
     cout << endl;
 }

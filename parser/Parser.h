@@ -175,6 +175,12 @@
               ast::Expression* parseFunctionLiteral();
 
               /**
+               * 解析哈希字面量
+               * @return ast::Expression*
+               */
+              ast::Expression* parseHashLiteral();
+
+              /**
                * 解析 infix 表达式
                * @param left  Expression*
                * @return ast::Expression*

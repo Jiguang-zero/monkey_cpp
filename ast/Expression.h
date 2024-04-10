@@ -454,6 +454,29 @@
 
         };
 
+        /**
+         * 哈希表字面量表达式
+         */
+        class HashLiteral : virtual public Expression {
+        private:
+            token::Token Token; // '{'词法单元
+            map<Expression*, Expression*> Pairs;
+
+        public:
+            explicit HashLiteral(token::Token token) : Token(std::move(token)) {}
+
+            [[maybe_unused]] void setPairs(map<Expression*, Expression*> pairs);
+
+            [[maybe_unused]] map<Expression*, Expression*> getPairs();;
+
+            void expressionNode() override {}
+
+            string TokenLiteral() override;
+
+            string String() override;
+
+        };
+
     } // ast
 
 // monkey

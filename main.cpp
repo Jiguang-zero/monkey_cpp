@@ -20,6 +20,8 @@ void test() {
     testAst();
 
     testEvaluator();
+
+    testObject();
 }
 
 

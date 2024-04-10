@@ -58,6 +58,7 @@ namespace monkey {
 
         const TokenType COMMA = ",";
         const TokenType SEMICOLON = ";";
+        const TokenType COLON = ":";
 
         const TokenType IDENT = "IDENT";
 

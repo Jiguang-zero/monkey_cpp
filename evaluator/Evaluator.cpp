@@ -141,6 +141,10 @@ monkey::object::Object *monkey::evaluator::Evaluator::Eval(ast::Node *node, obje
         return evalIndexExpression(left, index);
     }
 
+    else if (auto * hashLiteral = dynamic_cast<ast::HashLiteral*>(node)) {
+        return evalHashLiteral(hashLiteral, env);
+    }
+
     return nullptr;
 }
 
@@ -436,6 +440,10 @@ monkey::evaluator::Evaluator::evalIndexExpression(monkey::object::Object *left, 
         return evalArrayIndexExpression(left, index);
     }
 
+    else if (left->Type() == object::HASH_OBJ) {
+        return evalHashIndexExpression(left, index);
+    }
+
     else {
         return newError("index operator not supported: " + left->Type());
     }
@@ -456,6 +464,54 @@ monkey::evaluator::Evaluator::evalArrayIndexExpression(monkey::object::Object *a
     }
 
     return arrayObject->getElements()[idx];
+}
+
+monkey::object::Object *
+monkey::evaluator::Evaluator::evalHashLiteral(monkey::ast::HashLiteral *node, monkey::object::Environment *env) { // NOLINT(*-no-recursion)
+    map<object::HashKey, object::HashPair> pairs;
+
+    for (const auto & pair : node->getPairs()) {
+        auto * key = Eval(pair.first, env);
+        if (isError(key)) {
+            return key;
+        }
+
+        auto * hashKey = dynamic_cast<object::Hashable*>(key);
+        if (!hashKey) {
+            auto msg = "unusable as hash key: " + key->Type();
+            return newError(msg);
+        }
+
+        auto * value = Eval(pair.second, env);
+        if (isError(value)) {
+            return value;
+        }
+
+        object::HashKey hashed = hashKey->HashKey();
+
+        pairs[hashed] = {key, value};
+    }
+
+    return new object::Hash(pairs);
+}
+
+monkey::object::Object *
+monkey::evaluator::Evaluator::evalHashIndexExpression(monkey::object::Object *hash, monkey::object::Object *index) {
+    auto * hashObject = dynamic_cast<object::Hash*>(hash);
+
+    auto * key = dynamic_cast<object::Hashable*>(index);
+    if (!key) {
+        return newError("unusable as hash key: " + index->Type());
+    }
+
+    auto pairs = hashObject->getPairs();
+    if (pairs.find(key->HashKey()) == pairs.end()) {
+        return (object::Object*) &MY_NULL;
+    }
+    auto pair = pairs[key->HashKey()];
+
+    return pair.Value;
+
 }
 
 

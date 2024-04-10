@@ -307,6 +307,10 @@ void testErrorHandling() {
                     R"("Hello" - "World")",
                     "unknown operator: STRING - STRING",
             },
+            {
+                    R"({"name": "Monkey"}[fn(x) { x }];)",
+                    "unusable as hash key: FUNCTION",
+            },
     };
 
     for (const auto & test : tests) {
@@ -604,4 +608,122 @@ void testEvalArrayIndexExpressions() {
     }
 
     cout << "Test testEvalArrayIndexExpressions() END: " << getResult(flag) << endl;
+}
+
+void testEvalHashLiterals() {
+    cout << "Test testEvalHashLiterals() START:" << endl;
+
+    string input = R"(let two = "two";
+{
+    "one": 10 - 9,
+    "two": 1 + 1,
+    "thr" + "ee": 6 / 2,
+    4 : 4,
+    true: 5,
+    false:6
+}
+)";
+
+    auto * evaluated = testEval(input);
+    auto * result = dynamic_cast<object::Hash*>(evaluated);
+
+    if (!result) {
+        cerr << "get Hash failed. but " << evaluated->Type() << endl;
+        return;
+    }
+
+    bool flag(true);
+
+    map<object::HashKey, long long> expected = {
+            {object::String("one").HashKey(), 1},
+            {object::String("two").HashKey(), 2},
+            {object::String("three").HashKey(), 3},
+            {object::Integer(4).HashKey(), 4},
+            {object::Boolean(true).HashKey(), 5},
+            {object::Boolean(false).HashKey(), 6}
+    };
+
+    auto pairs = result->getPairs();
+
+    if (pairs.size() != expected.size()) {
+        cout << "Hash has wrong num of pairs. got " << result->getPairs().size();
+        cout << " but " << expected.size() << endl;
+
+        flag = false;
+    }
+
+    for (const auto & e : expected) {
+        if (pairs.find(e.first) == pairs.end()) {
+            cout << "no pair for key found " << endl;
+            flag = false;
+            continue;
+        }
+
+        auto pair = pairs[e.first];
+
+        if (!testIntegerObject(pair.Value, e.second)) {
+            flag = false;
+        }
+
+    }
+
+    cout << "Test testEvalHashLiterals() END: " << getResult(flag) << endl;
+}
+
+void testHashIndexExpressions() {
+    cout << "Test testHashIndexExpressions() START:" << endl;
+
+    bool flag(true);
+
+    struct TestType {
+        string input;
+        variant<long long, void*> expected;
+    };
+
+    vector<TestType> tests = {
+            {
+                    R"({"foo": 5}["foo"])",
+                    5,
+            },
+            {
+                    R"({"foo": 5}["bar"])",
+                    nullptr,
+            },
+            {
+                    R"(let key = "foo"; {"foo": 5}[key])",
+                    5,
+            },
+            {
+                    R"({}["foo"])",
+                    nullptr,
+            },
+            {
+                    R"({5: 5}[5],)",
+                    5,
+            },
+            {
+                    R"({true: 5}[true])",
+                    5,
+            },
+            {
+                    R"({false: 5}[false])",
+                    5,
+            },
+    };
+
+    for (const auto & test : tests) {
+        auto * evaluated = testEval(test.input);
+        if (holds_alternative<long long >(test.expected)) {
+            if (!testIntegerObject(evaluated, get<long long >(test.expected))) {
+                flag = false;
+            }
+        }
+        else {
+            if (!testNullObject(evaluated)) {
+                flag = false;
+            }
+        }
+    }
+
+    cout << "Test testHashIndexExpressions() END: " << getResult(flag) << endl;
 }

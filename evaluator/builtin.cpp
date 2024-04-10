@@ -122,7 +122,7 @@ namespace monkey::evaluator {
                                         return new object::Array({});
                                     }
                                     vector<object::Object *> newElements(length - 1);
-                                    for (int i = 0; i < length - 1; i ++ ) {
+                                    for (int i = 0; i < length - 1; i++) {
                                         newElements[i] = arr->getElements()[i + 1];
                                     }
 
@@ -159,6 +159,27 @@ namespace monkey::evaluator {
                                 newElements.emplace_back(args[1]);
 
                                 return new object::Array(newElements);
+                            }
+                    )
+            },
+
+            /**
+             * puts 函数
+             * 参数 对象
+             * 逐行输出 最后有一个换行符
+             */
+            {
+                    "puts",
+                    new object::Builtin(
+                            [](const vector<object::Object *> &args) -> object::Object * {
+                                string argsString;
+                                for (auto arg: args) {
+                                    argsString += arg->Inspect();
+                                    argsString += "\n";
+                                }
+
+                                return new object::String(argsString);
+
                             }
                     )
             }

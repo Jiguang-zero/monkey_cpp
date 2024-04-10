@@ -23,6 +23,7 @@
             p->registerPrefix(token::FUNCTION, &Parser::parseFunctionLiteral);
             p->registerPrefix(token::STRING, &Parser::parseStringLiteral);
             p->registerPrefix(token::LBRACKET, &Parser::parseArrayLiteral);
+            p->registerPrefix(token::LBRACE, &Parser::parseHashLiteral);
 
             // 注册中缀函数
             p->registerInfix(token::PLUS, &Parser::parseInfixExpression);
@@ -533,6 +534,60 @@
 
             return indexExpression;
 
+        }
+
+        ast::Expression *Parser::parseHashLiteral() {
+            auto * hash = new ast::HashLiteral(curToken);
+
+            //TODO: 错误处理 {a: 1, b:1, c:2;} 加入了不该出现的 ';' 程序会强制退出
+
+            map<ast::Expression*, ast::Expression*> pairs;
+
+            while (!peekTokenIs(token::RBRACE)) {
+                nextToken();
+
+                auto * key = parseExpression(LOWEST);
+
+                if (!expectPeek(token::COLON)) {
+                    // 释放空间
+                    delete hash;
+                    for (const auto & pair : pairs) {
+                        delete pair.first;
+                        delete pair.second;
+                    }
+
+                    return nullptr;
+                }
+
+                nextToken();
+
+                pairs[key] = parseExpression(LOWEST);
+
+                if (!peekTokenIs(token::RBRACE) && !expectPeek(token::COMMA)) {
+                    delete hash;
+                    for (const auto & pair : pairs) {
+                        delete pair.first;
+                        delete pair.second;
+                    }
+
+                    return nullptr;
+                }
+
+            }
+
+            if (!expectPeek(token::RBRACE)) {
+                delete hash;
+                for (const auto & pair : pairs) {
+                    delete pair.first;
+                    delete pair.second;
+                }
+
+                return nullptr;
+            }
+
+            hash->setPairs(pairs);
+
+            return hash;
         }
     }
 
