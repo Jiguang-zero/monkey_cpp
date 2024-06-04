@@ -50,7 +50,7 @@ namespace monkey::object {
         static Environment* NewEnclosedEnvironment(Environment* outer);
 
         /**
-         * 从环境 map 存储中 获取对象
+         * 从环境 keywords 存储中 获取对象
          * @param name  const string&
          * @return Object* 如果找不到，那么返回空指针
          */

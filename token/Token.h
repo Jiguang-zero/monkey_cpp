@@ -113,7 +113,7 @@ using std::map;
         extern map<string, TokenType > keywords;
 
         /**
-         * 从关键字 map 中查找 ident 是否是关键字
+         * 从关键字 keywords 中查找 ident 是否是关键字
          * @param ident const string&
          * @return 返回类型 TokenType
          */

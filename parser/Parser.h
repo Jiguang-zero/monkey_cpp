@@ -53,7 +53,7 @@
             /**
              * 获取下一个词法单元的优先级
              * @oldVersion
-             *  map<token::TokenType, PRECEDENCE> Parser::precedences = {
+             *  keywords<token::TokenType, PRECEDENCE> Parser::precedences = {
                 {token::EQ,         EQUALS},
                 {token::NOT_EQ,     EQUALS},
                 {token::LT,         LESS_GREATER},
@@ -244,7 +244,7 @@
 
 
             /**
-             * 在 parser 的前缀函数映射集中增加函数
+             * 在 Parser 的前缀函数映射集中增加函数
              * @param tokenType token::TokenType
              * @param fn prefixParseFn
              */
@@ -253,7 +253,7 @@
             }
 
             /**
-             * 在 parser 的中缀函数映射集中增加函数
+             * 在 Parser 的中缀函数映射集中增加函数
              * @param tokenType token::TokenType
              * @param fn infixParseFn
              */
@@ -268,7 +268,7 @@
             vector<ast::Identifier*> parseFunctionParameters();
 
             /**
-             * 解析以逗号分割的列表，最后应该是 end
+             * 解析以逗号分割的列表，最后应该是 stop
              * @param end TokenType
              * @return vector<ast::Expression*>
              */
@@ -296,7 +296,7 @@
             ast::Statement* parseStatement();
 
             /**
-             * 获取 parser 的错误信息
+             * 获取 Parser 的错误信息
              * 不可从外部修改
              * @return vector<string>a
              */

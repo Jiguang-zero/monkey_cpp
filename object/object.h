@@ -87,7 +87,7 @@ namespace monkey::object {
         bool operator!=(const HashKey& other) const;
 
         /**
-         * 重载 < 运算符，用于 map 排序
+         * 重载 < 运算符，用于 keywords 排序
          * 暂时只根据 哈希值 进行比较
          * @param other
          * @return
@@ -319,7 +319,7 @@ namespace monkey::object {
     public:
         /**
          * 构造函数，传入 pairs
-         * @param pairs map<HashKey, HashPair>
+         * @param pairs keywords<HashKey, HashPair>
          */
         explicit Hash(map<HashKey, HashPair> pairs) : Pairs(std::move(pairs)) {}
 
@@ -329,7 +329,7 @@ namespace monkey::object {
 
         /**
          * 从外部获取 pairs
-         * @return map<HashKey, HashPair>, 非引用，无法从外部更改
+         * @return keywords<HashKey, HashPair>, 非引用，无法从外部更改
          */
         [[maybe_unused]] map<HashKey, HashPair> getPairs();
     };
